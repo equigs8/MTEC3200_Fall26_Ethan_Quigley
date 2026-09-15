@@ -1,6 +1,6 @@
 # Problem Statement
 
-When I ____, I have to ____ which is frustrating because ____. I think this happens because ____. What I wish happened instead is ____.
+When I receive late or maybe responses for a poll in my rec soccer league, I have to rush to get subs which is frustrating because there isn't a lot of time to contact people. I think this happens because people don't care about it maybe as much as I do and the poll is very informal. What I wish happened instead is to get definitive response as early as possible.
 
 ## Self-Check
 
