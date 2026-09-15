@@ -1,10 +1,10 @@
 # What / How / Why
 
-| #   | WHAT                                                               | HOW                  | WHY                               |
-| --- | ------------------------------------------------------------------ | -------------------- | --------------------------------- |
-| 1   | I forgot to send a poll for my game this weekend. Sending it late. | stressed, rushed     | Lost track of the days.           |
-| 2   | Its hard to plan for subs                                          | Stressed             | I get a lot of "maybe" responses. |
-| 3   | Have less time to get subs.                                        | stressed and rushed. | Recived late responses            |
+| #   | WHAT                                                               | HOW                          | WHY                               |
+| --- | ------------------------------------------------------------------ | ---------------------------- | --------------------------------- |
+| 1   | I forgot to send a poll for my game this weekend. Sending it late. | stressed, rushed             | Lost track of the days.           |
+| 2   | Its hard to plan for subs                                          | Stressed                     | I get a lot of "maybe" responses. |
+| 3   | Have less time to get subs.                                        | stressed and rushed. Pissed. | Recived late responses            |
 
 
 ## Q&A
