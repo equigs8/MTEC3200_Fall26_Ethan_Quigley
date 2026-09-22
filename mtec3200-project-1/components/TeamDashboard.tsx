@@ -67,8 +67,11 @@ function TeamDashboardInner() {
         openProfileModal={() => setIsProfileModalOpen(true)}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 mx-auto w-full max-w-7xl px-3.5 py-5 sm:px-6 sm:py-8 pb-24 md:pb-8">
+      {/* Main Content Area with Smooth Tab Switch Transition */}
+      <main
+        key={activeTab}
+        className="flex-1 mx-auto w-full max-w-7xl px-3.5 py-5 sm:px-6 sm:py-8 pb-24 md:pb-8 animate-in fade-in duration-200 slide-in-from-bottom-2"
+      >
         {/* Player View */}
         {activeTab === "player_view" && (
           <PlayerView

@@ -25,7 +25,21 @@ export const MatchHypeWidgets: React.FC<MatchHypeWidgetsProps> = ({ match }) => 
     minutes: number;
     seconds: number;
     isPast: boolean;
-  }>({ days: 0, hours: 0, minutes: 0, seconds: 0, isPast: false });
+  }>(() => {
+    const matchDateTime = new Date(`${match.date}T${match.time || "16:00"}:00`);
+    const now = new Date();
+    const difference = matchDateTime.getTime() - now.getTime();
+    if (isNaN(difference) || difference <= 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0, isPast: true };
+    }
+    return {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((difference / (1000 * 60)) % 60),
+      seconds: Math.floor((difference / 1000) % 60),
+      isPast: false,
+    };
+  });
 
   const [soundEnabled, setSoundEnabled] = useState(soundFx.enabled);
 
@@ -35,17 +49,32 @@ export const MatchHypeWidgets: React.FC<MatchHypeWidgetsProps> = ({ match }) => 
       const now = new Date();
       const difference = matchDateTime.getTime() - now.getTime();
 
-      if (difference <= 0) {
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, isPast: true });
+      if (isNaN(difference) || difference <= 0) {
+        setTimeLeft((prev) =>
+          prev.isPast
+            ? prev
+            : { days: 0, hours: 0, minutes: 0, seconds: 0, isPast: true }
+        );
         return;
       }
 
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((difference / 1000 / 60) % 60);
+      const minutes = Math.floor((difference / (1000 * 60)) % 60);
       const seconds = Math.floor((difference / 1000) % 60);
 
-      setTimeLeft({ days, hours, minutes, seconds, isPast: false });
+      setTimeLeft((prev) => {
+        if (
+          !prev.isPast &&
+          prev.days === days &&
+          prev.hours === hours &&
+          prev.minutes === minutes &&
+          prev.seconds === seconds
+        ) {
+          return prev;
+        }
+        return { days, hours, minutes, seconds, isPast: false };
+      });
     };
 
     calculateTime();

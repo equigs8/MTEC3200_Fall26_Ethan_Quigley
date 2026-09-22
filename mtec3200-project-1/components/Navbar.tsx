@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useTeamHub } from "@/context/TeamHubContext";
 import { UserRole } from "@/types/footy";
 import {
@@ -25,6 +25,7 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import { footyClerkTheme } from "@/lib/clerkTheme";
+import { soundFx } from "@/lib/soundEffects";
 
 interface NavbarProps {
   activeTab: string;
@@ -86,6 +87,66 @@ export const Navbar: React.FC<NavbarProps> = ({
           { id: "schedule", label: "Schedule", shortLabel: "Schedule", icon: Calendar },
         ];
 
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const mobileTabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  const [desktopIndicator, setDesktopIndicator] = useState<{
+    left: number;
+    width: number;
+    opacity: number;
+  }>({ left: 0, width: 0, opacity: 0 });
+
+  const [mobileIndicator, setMobileIndicator] = useState<{
+    left: number;
+    width: number;
+    opacity: number;
+  }>({ left: 0, width: 0, opacity: 0 });
+
+  // Update animated indicator position on tab change or window resize
+  useEffect(() => {
+    const updatePositions = () => {
+      const activeEl = tabRefs.current[activeTab];
+      if (activeEl) {
+        setDesktopIndicator((prev) => {
+          if (
+            prev.left === activeEl.offsetLeft &&
+            prev.width === activeEl.offsetWidth &&
+            prev.opacity === 1
+          ) {
+            return prev;
+          }
+          return {
+            left: activeEl.offsetLeft,
+            width: activeEl.offsetWidth,
+            opacity: 1,
+          };
+        });
+      }
+
+      const activeMobileEl = mobileTabRefs.current[activeTab];
+      if (activeMobileEl) {
+        setMobileIndicator((prev) => {
+          if (
+            prev.left === activeMobileEl.offsetLeft &&
+            prev.width === activeMobileEl.offsetWidth &&
+            prev.opacity === 1
+          ) {
+            return prev;
+          }
+          return {
+            left: activeMobileEl.offsetLeft,
+            width: activeMobileEl.offsetWidth,
+            opacity: 1,
+          };
+        });
+      }
+    };
+
+    updatePositions();
+    window.addEventListener("resize", updatePositions);
+    return () => window.removeEventListener("resize", updatePositions);
+  }, [activeTab, activeRole]);
+
   return (
     <>
       {/* Sticky Top Header */}
@@ -125,24 +186,47 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Desktop Navigation Tabs */}
-          <nav className="hidden md:flex items-center gap-1 rounded-xl bg-[#111823] p-1 border border-zinc-800/80 shadow-inner">
+          <nav className="relative hidden md:flex items-center gap-1 rounded-xl bg-[#111823] p-1 border border-zinc-800/80 shadow-inner">
+            {/* Sliding Active Tab Magic Pill */}
+            {desktopIndicator.opacity > 0 && (
+              <div
+                className="absolute top-1 bottom-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 shadow-md shadow-emerald-950/60 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+                style={{
+                  left: `${desktopIndicator.left}px`,
+                  width: `${desktopIndicator.width}px`,
+                }}
+              >
+                <div className="absolute inset-0 rounded-lg bg-emerald-400/20 blur-[2px]" />
+              </div>
+            )}
+
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`relative flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold tracking-wide transition-all ${
+                  ref={(el) => {
+                    tabRefs.current[item.id] = el;
+                  }}
+                  onClick={() => {
+                    soundFx.playPop();
+                    setActiveTab(item.id);
+                  }}
+                  className={`relative z-10 flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold tracking-wide transition-colors duration-200 active:scale-95 ${
                     isActive
-                      ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-950/50"
-                      : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50"
+                      ? "text-white font-bold"
+                      : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/30"
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      isActive ? "scale-110 text-white" : "text-zinc-400"
+                    }`}
+                  />
                   <span>{item.label}</span>
                   {item.badge && (
-                    <span className="flex h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+                    <span className="flex h-2 w-2 rounded-full bg-rose-500 animate-pulse ml-0.5" />
                   )}
                 </button>
               );
@@ -348,25 +432,43 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Sticky Bottom App Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800/90 bg-[#090d12]/95 backdrop-blur-xl md:hidden px-2 pt-1 pb-safe shadow-2xl">
-        <div className="flex items-center justify-around gap-1">
+        <div className="relative flex items-center justify-around gap-1">
+          {/* Animated Sliding Indicator Bar */}
+          {mobileIndicator.opacity > 0 && (
+            <div
+              className="absolute -top-1 h-1 rounded-full bg-[#00e676] shadow-sm shadow-emerald-400 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none"
+              style={{
+                left: `${mobileIndicator.left + (mobileIndicator.width - 28) / 2}px`,
+                width: "28px",
+              }}
+            />
+          )}
+
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`relative flex flex-1 flex-col items-center justify-center py-2 px-1 rounded-xl transition-all ${
+                ref={(el) => {
+                  mobileTabRefs.current[item.id] = el;
+                }}
+                onClick={() => {
+                  soundFx.playPop();
+                  setActiveTab(item.id);
+                }}
+                className={`relative flex flex-1 flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 active:scale-90 ${
                   isActive
                     ? "text-[#00e676] font-bold"
                     : "text-zinc-400 hover:text-zinc-200"
                 }`}
               >
-                {isActive && (
-                  <span className="absolute top-0.5 h-1 w-6 rounded-full bg-[#00e676] shadow-sm shadow-emerald-400" />
-                )}
                 <div className="relative mt-0.5">
-                  <Icon className={`h-5 w-5 ${isActive ? "scale-110" : ""}`} />
+                  <Icon
+                    className={`h-5 w-5 transition-transform duration-200 ${
+                      isActive ? "scale-115 text-[#00e676]" : "text-zinc-400"
+                    }`}
+                  />
                   {item.badge && (
                     <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white shadow-sm animate-pulse">
                       {item.badge}
