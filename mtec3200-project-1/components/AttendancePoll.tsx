@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTeamHub } from "@/context/TeamHubContext";
 import { RSVPStatus } from "@/types/footy";
 import {
@@ -26,6 +26,7 @@ export const AttendancePoll: React.FC<AttendancePollProps> = ({ onGoToSubs }) =>
     updateRSVP,
     matchMetrics,
     teamSettings,
+    currentUser,
   } = useTeamHub();
 
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("p1"); // Default to Ethan
@@ -35,6 +36,19 @@ export const AttendancePoll: React.FC<AttendancePollProps> = ({ onGoToSubs }) =>
     playerId: string;
     targetStatus: RSVPStatus;
   } | null>(null);
+
+  // Sync selected player with current logged in persona / Clerk user
+  useEffect(() => {
+    const matched = players.find(
+      (p) =>
+        p.id === currentUser.id ||
+        (currentUser.clerkId && p.id === `p-${currentUser.clerkId.slice(-4)}`) ||
+        p.name.toLowerCase() === currentUser.name.toLowerCase()
+    );
+    if (matched) {
+      setSelectedPlayerId(matched.id);
+    }
+  }, [currentUser, players]);
 
   if (!activeMatch) return null;
 

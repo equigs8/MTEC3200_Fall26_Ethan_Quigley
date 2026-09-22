@@ -48,6 +48,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     setActiveRole,
     userProfiles,
     switchPersona,
+    isClerkSignedIn,
+    clerkUser,
   } = useTeamHub();
 
   const [isPersonaMenuOpen, setIsPersonaMenuOpen] = useState(false);
@@ -177,15 +179,32 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => setIsPersonaMenuOpen(!isPersonaMenuOpen)}
                 className="flex items-center gap-2 rounded-xl border border-zinc-700 bg-[#111823] px-2.5 py-1.5 text-xs font-bold text-white hover:border-emerald-500 transition shadow-sm"
               >
-                <div className="flex h-5 w-5 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 text-[10px] font-black">
-                  {currentUser.role === "captain" ? "👑" : currentUser.role === "player" ? "⚽" : "🏃‍♀️"}
+                <div className="relative flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 text-[10px] font-black overflow-hidden border border-emerald-500/30 shrink-0">
+                  {currentUser.avatar ? (
+                    <img
+                      src={currentUser.avatar}
+                      alt={currentUser.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span>
+                      {currentUser.role === "captain" ? "👑" : currentUser.role === "player" ? "⚽" : "🏃‍♀️"}
+                    </span>
+                  )}
+                  {isClerkSignedIn && (
+                    <span
+                      className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-[#00e676] ring-1 ring-black"
+                      title="Clerk Account Linked"
+                    />
+                  )}
                 </div>
                 <div className="text-left hidden sm:block">
-                  <span className="text-xs font-semibold text-white block leading-tight">
+                  <span className="text-xs font-semibold text-white block leading-tight truncate max-w-[100px]">
                     {currentUser.name.split(" ")[0]}
                   </span>
                   <span className="text-[9px] uppercase tracking-wider text-emerald-400 block leading-tight font-bold">
                     {currentUser.role}
+                    {isClerkSignedIn && " • Clerk"}
                   </span>
                 </div>
                 <ChevronDown className="h-3 w-3 text-zinc-400" />
@@ -193,8 +212,27 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               {/* Persona Switch Menu */}
               {isPersonaMenuOpen && (
-                <div className="absolute right-0 mt-2 w-64 rounded-2xl border border-zinc-800 bg-[#111823] p-2.5 shadow-2xl z-50 animate-in fade-in duration-100">
-                  <div className="px-2 py-1 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+                <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-zinc-800 bg-[#111823] p-2.5 shadow-2xl z-50 animate-in fade-in duration-100">
+                  {/* Clerk Sync Status Banner */}
+                  {isClerkSignedIn && clerkUser ? (
+                    <div className="mb-2 p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30">
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-full bg-[#00e676] animate-pulse" />
+                        <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">
+                          Clerk Account Linked
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-zinc-300 truncate mt-1">
+                        {clerkUser.primaryEmailAddress?.emailAddress || clerkUser.fullName}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mb-2 p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-[11px] text-zinc-400">
+                      💡 Sign in to sync your personal footy profile &amp; receive team alerts.
+                    </div>
+                  )}
+
+                  <div className="px-2 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
                     Switch Active Persona
                   </div>
                   <div className="space-y-1 my-1">
@@ -214,19 +252,29 @@ export const Navbar: React.FC<NavbarProps> = ({
                             : "hover:bg-zinc-800/60 text-zinc-300"
                         }`}
                       >
-                        <div className="flex items-center gap-2">
-                          <span>
-                            {profile.role === "captain" ? "👑" : profile.role === "player" ? "⚽" : "🏃‍♀️"}
-                          </span>
-                          <div>
-                            <span className="block font-semibold">{profile.name}</span>
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="h-6 w-6 rounded-lg overflow-hidden flex items-center justify-center bg-zinc-800 text-[11px] shrink-0 border border-zinc-700/60">
+                            {profile.avatar ? (
+                              <img
+                                src={profile.avatar}
+                                alt={profile.name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <span>
+                                {profile.role === "captain" ? "👑" : profile.role === "player" ? "⚽" : "🏃‍♀️"}
+                              </span>
+                            )}
+                          </div>
+                          <div className="truncate">
+                            <span className="block font-semibold truncate">{profile.name}</span>
                             <span className="block text-[10px] text-zinc-400 capitalize">
                               {profile.role} • {profile.skillLevel || "P3"}
                             </span>
                           </div>
                         </div>
                         {currentUser.id === profile.id && (
-                          <CheckCircle2 className="h-3.5 w-3.5 text-[#00e676]" />
+                          <CheckCircle2 className="h-3.5 w-3.5 text-[#00e676] shrink-0 ml-1" />
                         )}
                       </button>
                     ))}

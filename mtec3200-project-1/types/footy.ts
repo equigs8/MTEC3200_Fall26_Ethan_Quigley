@@ -16,6 +16,7 @@ export interface UserProfile {
   role: UserRole;
   phone: string;
   email?: string;
+  avatar?: string;
   gender: GenderCategory;
   skillLevel: SkillLevel;
   preferredPositions: Position[];
@@ -81,6 +82,7 @@ export interface SubCandidate {
   name: string;
   phone: string;
   email?: string;
+  avatar?: string;
   gender: GenderCategory;
   positions: Position[];
   tier: 1 | 2 | 3; // 1: Go-to starter sub, 2: Reliable friend, 3: Emergency contact

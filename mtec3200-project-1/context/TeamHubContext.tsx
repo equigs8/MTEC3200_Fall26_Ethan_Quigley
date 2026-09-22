@@ -21,6 +21,8 @@ import {
 } from "@/lib/initialData";
 import { convertLeagueAppsEventsToMatches, ParsedLeagueAppsEvent } from "@/lib/leagueapps";
 
+import { useUser } from "@clerk/nextjs";
+
 const STORAGE_KEY_SETTINGS = "nyc_footy_settings";
 const STORAGE_KEY_PLAYERS = "nyc_footy_players";
 const STORAGE_KEY_MATCHES = "nyc_footy_matches";
@@ -67,6 +69,9 @@ interface TeamHubContextType {
   setFormation: (matchId: string, formation: "2-3-1" | "3-2-1" | "2-2-2") => void;
   syncLeagueAppsMatches: (events: ParsedLeagueAppsEvent[], detectedTeamName?: string) => void;
   resetAllData: () => void;
+  // Clerk Integration
+  isClerkSignedIn: boolean;
+  clerkUser: any;
   // User & Role
   currentUser: UserProfile;
   setCurrentUser: (user: UserProfile) => void;
@@ -144,6 +149,101 @@ export function TeamHubProvider({ children }: { children: React.ReactNode }) {
     getStored(STORAGE_KEY_ROLE, "captain")
   );
   const [dismissedAlertIds, setDismissedAlertIds] = useState<string[]>([]);
+
+  // Hook into Clerk user session
+  const { isLoaded: isClerkLoaded, isSignedIn: isClerkSignedIn, user: clerkUser } = useUser();
+
+  // Automatically sync Clerk signed-in profile with the site's profile
+  useEffect(() => {
+    if (!isClerkLoaded || !isClerkSignedIn || !clerkUser) return;
+
+    // 1. Check if profile already linked by clerkId
+    const existingByClerkId = userProfiles.find((u) => u.clerkId === clerkUser.id);
+    if (existingByClerkId) {
+      const updated: UserProfile = {
+        ...existingByClerkId,
+        name: clerkUser.fullName || clerkUser.firstName || existingByClerkId.name,
+        email: clerkUser.primaryEmailAddress?.emailAddress || existingByClerkId.email,
+        avatar: clerkUser.imageUrl || existingByClerkId.avatar,
+      };
+      setCurrentUser(updated);
+      setActiveRole(updated.role);
+      setUserProfiles((prev) =>
+        prev.map((p) => (p.id === updated.id ? updated : p))
+      );
+      return;
+    }
+
+    // 2. Check if user matches an existing profile by email or name (e.g. initial demo profile)
+    const userEmail = clerkUser.primaryEmailAddress?.emailAddress?.toLowerCase();
+    const userFullName = clerkUser.fullName?.toLowerCase();
+    const existingMatch = userProfiles.find(
+      (u) =>
+        (userEmail && u.email && u.email.toLowerCase() === userEmail) ||
+        (userFullName && u.name.toLowerCase() === userFullName)
+    );
+
+    if (existingMatch) {
+      const updated: UserProfile = {
+        ...existingMatch,
+        clerkId: clerkUser.id,
+        avatar: clerkUser.imageUrl || existingMatch.avatar,
+        email: clerkUser.primaryEmailAddress?.emailAddress || existingMatch.email,
+        name: clerkUser.fullName || existingMatch.name,
+      };
+      setCurrentUser(updated);
+      setActiveRole(updated.role);
+      setUserProfiles((prev) =>
+        prev.map((p) => (p.id === updated.id ? updated : p))
+      );
+      return;
+    }
+
+    // 3. New Clerk User! Create and register their profile
+    const newProfile: UserProfile = {
+      id: `user-${clerkUser.id}`,
+      clerkId: clerkUser.id,
+      name: clerkUser.fullName || clerkUser.firstName || "NYC Footy Player",
+      role: "player",
+      phone: clerkUser.primaryPhoneNumber?.phoneNumber || "",
+      email: clerkUser.primaryEmailAddress?.emailAddress || "",
+      avatar: clerkUser.imageUrl,
+      gender: "female",
+      skillLevel: "P3",
+      preferredPositions: ["MID"],
+      teamId: "bushwick-borough-fc",
+      subAvailability: {
+        isAvailable: true,
+        boroughs: ["Brooklyn", "Manhattan"],
+        notes: "Joined via Clerk account",
+      },
+      bio: "Active NYC Footy player",
+    };
+
+    setUserProfiles((prev) => [newProfile, ...prev]);
+    setCurrentUser(newProfile);
+    setActiveRole("player");
+
+    // Also add to roster if not already present
+    setPlayers((prev) => {
+      if (prev.some((p) => p.name.toLowerCase() === newProfile.name.toLowerCase())) {
+        return prev;
+      }
+      return [
+        ...prev,
+        {
+          id: `p-${clerkUser.id.slice(-4)}`,
+          name: newProfile.name,
+          gender: newProfile.gender,
+          preferredPositions: newProfile.preferredPositions,
+          phone: newProfile.phone,
+          avatar: newProfile.avatar,
+          skillLevel: newProfile.skillLevel,
+          subAvailability: newProfile.subAvailability,
+        },
+      ];
+    });
+  }, [isClerkLoaded, isClerkSignedIn, clerkUser?.id]);
 
   // Save to local storage on changes
   useEffect(() => {
@@ -517,6 +617,39 @@ export function TeamHubProvider({ children }: { children: React.ReactNode }) {
       setUserProfiles((list) =>
         list.map((u) => (u.id === prev.id ? updated : u))
       );
+      // Synchronize with team roster players list
+      setPlayers((list) =>
+        list.map((p) =>
+          p.name.toLowerCase() === prev.name.toLowerCase() || p.id === prev.id
+            ? {
+                ...p,
+                name: updated.name,
+                gender: updated.gender,
+                preferredPositions: updated.preferredPositions,
+                phone: updated.phone,
+                skillLevel: updated.skillLevel,
+              }
+            : p
+        )
+      );
+      // Synchronize with free agent sub pool
+      setSubs((list) =>
+        list.map((s) =>
+          s.name.toLowerCase() === prev.name.toLowerCase() || s.id === prev.id
+            ? {
+                ...s,
+                name: updated.name,
+                gender: updated.gender,
+                positions: updated.preferredPositions,
+                phone: updated.phone,
+                skillLevel: updated.skillLevel,
+                bio: updated.bio,
+                boroughs: updated.subAvailability.boroughs,
+                isAvailableForSubbing: updated.subAvailability.isAvailable,
+              }
+            : s
+        )
+      );
       return updated;
     });
   };
@@ -636,6 +769,8 @@ export function TeamHubProvider({ children }: { children: React.ReactNode }) {
         setFormation,
         syncLeagueAppsMatches,
         resetAllData,
+        isClerkSignedIn: !!isClerkSignedIn,
+        clerkUser,
         currentUser,
         setCurrentUser,
         activeRole,

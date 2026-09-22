@@ -11,7 +11,8 @@ interface OnboardingModalProps {
 }
 
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) => {
-  const { currentUser, updateUserProfile, activeRole, setActiveRole } = useTeamHub();
+  const { currentUser, updateUserProfile, activeRole, setActiveRole, isClerkSignedIn, clerkUser } =
+    useTeamHub();
 
   const [name, setName] = useState(currentUser.name);
   const [role, setRole] = useState<UserRole>(currentUser.role || activeRole);
@@ -28,6 +29,21 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     currentUser.subAvailability?.boroughs || ["Brooklyn"]
   );
   const [bio, setBio] = useState(currentUser.bio || "");
+
+  // Sync state whenever modal opens or active user changes
+  React.useEffect(() => {
+    if (isOpen) {
+      setName(currentUser.name);
+      setRole(currentUser.role || activeRole);
+      setPhone(currentUser.phone || "");
+      setGender(currentUser.gender || "male");
+      setSkillLevel(currentUser.skillLevel || "P3");
+      setPositions(currentUser.preferredPositions || ["MID"]);
+      setIsAvailable(currentUser.subAvailability?.isAvailable ?? true);
+      setBoroughs(currentUser.subAvailability?.boroughs || ["Brooklyn"]);
+      setBio(currentUser.bio || "");
+    }
+  }, [currentUser, activeRole, isOpen]);
 
   if (!isOpen) return null;
 
@@ -81,7 +97,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
           <X className="h-5 w-5" />
         </button>
 
-        <div className="flex items-center gap-3 mb-5">
+        <div className="flex items-center gap-3 mb-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/20 text-[#00e676] border border-emerald-500/30">
             <Sparkles className="h-5 w-5" />
           </div>
@@ -92,6 +108,36 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             </p>
           </div>
         </div>
+
+        {/* Clerk Account Sync Badge */}
+        {isClerkSignedIn && clerkUser && (
+          <div className="mb-4 flex items-center gap-3 rounded-2xl bg-[#090d12] p-3 border border-emerald-500/30">
+            {clerkUser.imageUrl ? (
+              <img
+                src={clerkUser.imageUrl}
+                alt={currentUser.name}
+                className="h-10 w-10 rounded-xl object-cover border border-emerald-400/40"
+              />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 font-bold">
+                {currentUser.name.charAt(0)}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-white truncate">
+                  {clerkUser.fullName || currentUser.name}
+                </span>
+                <span className="rounded-md bg-emerald-500/20 px-1.5 py-0.5 text-[9px] font-bold text-[#00e676] border border-emerald-500/30">
+                  Clerk Linked
+                </span>
+              </div>
+              <span className="text-[11px] text-zinc-400 truncate block">
+                {clerkUser.primaryEmailAddress?.emailAddress || "Authenticated User"}
+              </span>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSave} className="space-y-4">
           {/* Role Selection */}

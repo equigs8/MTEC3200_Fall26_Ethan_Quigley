@@ -296,32 +296,41 @@ export const SubFinder: React.FC = () => {
             >
               {/* Top Header */}
               <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-base sm:text-lg font-bold text-white">{sub.name}</h4>
-                    <span
-                      className={`rounded px-1.5 py-0.2 text-[10px] font-bold ${
-                        sub.gender === "female"
-                          ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                          : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
-                      }`}
-                    >
-                      {sub.gender === "female" ? "Woman" : "Man"}
-                    </span>
-                    <span className="rounded bg-[#090d12] px-1.5 py-0.2 text-[10px] font-semibold text-zinc-300 border border-zinc-800">
-                      Tier {sub.tier}
-                    </span>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-2xl overflow-hidden bg-zinc-800 flex items-center justify-center text-sm font-bold text-white shrink-0 border border-zinc-700/60">
+                    {sub.avatar ? (
+                      <img src={sub.avatar} alt={sub.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <span>{sub.name.charAt(0)}</span>
+                    )}
                   </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-base sm:text-lg font-bold text-white">{sub.name}</h4>
+                      <span
+                        className={`rounded px-1.5 py-0.2 text-[10px] font-bold ${
+                          sub.gender === "female"
+                            ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                            : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                        }`}
+                      >
+                        {sub.gender === "female" ? "Woman" : "Man"}
+                      </span>
+                      <span className="rounded bg-[#090d12] px-1.5 py-0.2 text-[10px] font-semibold text-zinc-300 border border-zinc-800">
+                        Tier {sub.tier}
+                      </span>
+                    </div>
 
-                  <div className="mt-1 flex items-center gap-2 text-xs text-zinc-400">
-                    <span className="text-zinc-300 font-medium">
-                      Pos: {sub.positions.join(", ")}
-                    </span>
-                    <span className="text-zinc-600">•</span>
-                    <span className="flex items-center gap-0.5 text-amber-400">
-                      <Star className="h-3 w-3 fill-amber-400" />
-                      {sub.reliabilityScore}.0
-                    </span>
+                    <div className="mt-1 flex items-center gap-2 text-xs text-zinc-400">
+                      <span className="text-zinc-300 font-medium">
+                        Pos: {sub.positions.join(", ")}
+                      </span>
+                      <span className="text-zinc-600">•</span>
+                      <span className="flex items-center gap-0.5 text-amber-400">
+                        <Star className="h-3 w-3 fill-amber-400" />
+                        {sub.reliabilityScore}.0
+                      </span>
+                    </div>
                   </div>
                 </div>
 

@@ -49,8 +49,9 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
     players.find(
       (p) =>
         p.id === currentUser.id ||
+        (currentUser.clerkId && p.id === `p-${currentUser.clerkId.slice(-4)}`) ||
         p.name.toLowerCase() === currentUser.name.toLowerCase()
-    ) || players[1]; // default to Mariama
+    ) || players[1] || players[0];
 
   const currentRSVP = activeMatch.rsvps[matchingPlayer.id]?.status || "pending";
   const currentReason = activeMatch.rsvps[matchingPlayer.id]?.reason;
@@ -88,8 +89,16 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
       {/* Player Greeting Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-3xl border border-zinc-800 bg-[#111823] p-5 sm:p-6 shadow-xl">
         <div className="flex items-center gap-3.5">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-xl font-bold text-white shadow-lg shadow-emerald-950/40">
-            {matchingPlayer.name.charAt(0)}
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-xl font-bold text-white shadow-lg shadow-emerald-950/40 overflow-hidden">
+            {currentUser.avatar || matchingPlayer.avatar ? (
+              <img
+                src={currentUser.avatar || matchingPlayer.avatar}
+                alt={matchingPlayer.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              matchingPlayer.name.charAt(0)
+            )}
           </div>
           <div>
             <div className="flex items-center gap-2">
