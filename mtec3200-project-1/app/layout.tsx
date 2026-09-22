@@ -1,20 +1,25 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const poppins = Poppins({
+  weight: ["300", "400", "500", "600", "700", "800"],
   subsets: ["latin"],
+  variable: "--font-poppins",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+export const viewport: Viewport = {
+  themeColor: "#090d12",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata: Metadata = {
   title: "NYC Footy Team Hub",
-  description: "Team command center for NYC Footy: weekly attendance polls, 7v7 tactical lineups, match schedule, and automated sub outreach.",
+  description:
+    "Team command center for NYC Footy: weekly attendance polls, 7v7 tactical lineups, match schedule, and automated sub outreach.",
 };
 
 export default function RootLayout({
@@ -26,9 +31,12 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      className={`${poppins.variable} h-full antialiased dark`}
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col bg-[#090d12] text-zinc-100 font-sans selection:bg-emerald-500/30 selection:text-emerald-300 pb-16 md:pb-0"
+      >
         {children}
       </body>
     </html>

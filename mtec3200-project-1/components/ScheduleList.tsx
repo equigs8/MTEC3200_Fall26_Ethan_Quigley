@@ -75,26 +75,26 @@ export const ScheduleList: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header & Season Record Card */}
-      <div className="rounded-3xl border border-zinc-800 bg-zinc-900/90 p-6 shadow-xl backdrop-blur-md sm:p-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-800/80 pb-6">
+      <div className="rounded-3xl border border-zinc-800/80 bg-[#111823] p-5 sm:p-8 shadow-xl backdrop-blur-md">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-800/80 pb-5">
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
-              <Sparkles className="h-3.5 w-3.5" />
-              NYC Footy Season Fixtures
+              <Sparkles className="h-3.5 w-3.5 text-[#00e676]" />
+              Official NYC Footy Season
             </div>
-            <h3 className="mt-1 text-2xl font-black text-white sm:text-3xl">
+            <h3 className="mt-1 text-xl sm:text-2xl font-black text-white">
               Schedule & Standings
             </h3>
-            <p className="mt-1 text-sm text-zinc-400">
-              {teamSettings.division} • {teamSettings.format}
+            <p className="mt-1 text-xs sm:text-sm text-zinc-400">
+              {teamSettings.leagueName} • {teamSettings.division} ({teamSettings.format})
             </p>
           </div>
 
           <button
             onClick={() => setIsAddMatchOpen(true)}
-            className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-500 transition shadow-lg shadow-emerald-950/50 self-start md:self-auto"
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-bold text-white hover:from-emerald-500 hover:to-teal-500 transition shadow-lg shadow-emerald-950/50 self-start md:self-auto active:scale-95"
           >
             <Plus className="h-4 w-4" />
             <span>Add Match</span>
@@ -102,30 +102,30 @@ export const ScheduleList: React.FC = () => {
         </div>
 
         {/* Season Record KPIs */}
-        <div className="mt-6 grid grid-cols-2 sm:grid-cols-6 gap-3 text-center">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-3">
+        <div className="mt-5 grid grid-cols-3 sm:grid-cols-6 gap-2.5 sm:gap-3 text-center">
+          <div className="rounded-2xl border border-zinc-800/80 bg-[#090d12] p-3">
             <div className="text-[10px] font-bold text-zinc-400 uppercase">PLAYED</div>
-            <div className="text-2xl font-black text-white mt-0.5">{seasonRecord.played}</div>
+            <div className="text-xl sm:text-2xl font-black text-white mt-0.5">{seasonRecord.played}</div>
           </div>
           <div className="rounded-2xl border border-emerald-900/50 bg-emerald-950/30 p-3">
-            <div className="text-[10px] font-bold text-emerald-400 uppercase">WINS</div>
-            <div className="text-2xl font-black text-emerald-300 mt-0.5">{seasonRecord.won}</div>
+            <div className="text-[10px] font-bold text-[#00e676] uppercase">WINS</div>
+            <div className="text-xl sm:text-2xl font-black text-[#00e676] mt-0.5">{seasonRecord.won}</div>
           </div>
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-3">
+          <div className="rounded-2xl border border-zinc-800/80 bg-[#090d12] p-3">
             <div className="text-[10px] font-bold text-zinc-400 uppercase">DRAWS</div>
-            <div className="text-2xl font-black text-zinc-300 mt-0.5">{seasonRecord.drawn}</div>
+            <div className="text-xl sm:text-2xl font-black text-zinc-300 mt-0.5">{seasonRecord.drawn}</div>
           </div>
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-3">
+          <div className="rounded-2xl border border-zinc-800/80 bg-[#090d12] p-3">
             <div className="text-[10px] font-bold text-zinc-400 uppercase">LOSSES</div>
-            <div className="text-2xl font-black text-zinc-300 mt-0.5">{seasonRecord.lost}</div>
+            <div className="text-xl sm:text-2xl font-black text-zinc-300 mt-0.5">{seasonRecord.lost}</div>
           </div>
           <div className="rounded-2xl border border-emerald-800/80 bg-emerald-950/50 p-3">
-            <div className="text-[10px] font-bold text-emerald-400 uppercase">POINTS</div>
-            <div className="text-2xl font-black text-emerald-400 mt-0.5">{seasonRecord.points}</div>
+            <div className="text-[10px] font-bold text-[#00e676] uppercase">POINTS</div>
+            <div className="text-xl sm:text-2xl font-black text-[#00e676] mt-0.5">{seasonRecord.points}</div>
           </div>
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-3">
+          <div className="rounded-2xl border border-zinc-800/80 bg-[#090d12] p-3">
             <div className="text-[10px] font-bold text-zinc-400 uppercase">GOALS (F/A)</div>
-            <div className="text-lg font-black text-white mt-1">
+            <div className="text-base sm:text-lg font-black text-white mt-1">
               {seasonRecord.goalsFor} : {seasonRecord.goalsAgainst}
             </div>
           </div>
@@ -136,9 +136,9 @@ export const ScheduleList: React.FC = () => {
       <div className="flex items-center gap-2 border-b border-zinc-800 pb-2">
         <button
           onClick={() => setActiveTab("upcoming")}
-          className={`rounded-xl px-4 py-2 text-sm font-bold transition ${
+          className={`rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition ${
             activeTab === "upcoming"
-              ? "bg-emerald-600 text-white shadow-sm"
+              ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm"
               : "text-zinc-400 hover:text-white"
           }`}
         >
@@ -146,7 +146,7 @@ export const ScheduleList: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveTab("past")}
-          className={`rounded-xl px-4 py-2 text-sm font-bold transition ${
+          className={`rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition ${
             activeTab === "past"
               ? "bg-zinc-800 text-white shadow-sm"
               : "text-zinc-400 hover:text-white"
@@ -178,38 +178,38 @@ export const ScheduleList: React.FC = () => {
               return (
                 <div
                   key={match.id}
-                  className={`rounded-3xl border p-5 sm:p-6 transition-all ${
+                  className={`rounded-3xl border p-4 sm:p-6 transition-all ${
                     isActive
-                      ? "border-emerald-500 bg-gradient-to-r from-zinc-900 to-zinc-950 ring-1 ring-emerald-500/50 shadow-xl"
-                      : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700"
+                      ? "border-[#00e676] bg-gradient-to-r from-[#111823] to-[#090d12] ring-1 ring-[#00e676]/40 shadow-xl"
+                      : "border-zinc-800/80 bg-[#111823] hover:border-zinc-700"
                   }`}
                 >
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     {/* Fixture Details */}
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-xs font-bold text-emerald-400 border border-emerald-500/30">
+                        <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-xs font-bold text-[#00e676] border border-emerald-500/30">
                           Week {match.week}
                         </span>
                         {isActive && (
-                          <span className="rounded bg-zinc-800 px-2 py-0.5 text-[10px] font-semibold text-zinc-300">
+                          <span className="rounded bg-[#090d12] px-2 py-0.5 text-[10px] font-semibold text-emerald-300 border border-emerald-800/50">
                             Current Focus Match
                           </span>
                         )}
                       </div>
 
-                      <h4 className="mt-2 text-xl font-bold text-white">
+                      <h4 className="mt-2 text-lg sm:text-xl font-bold text-white">
                         {teamSettings.name} vs {match.opponent}
                       </h4>
 
                       <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-zinc-400">
                         <span className="flex items-center gap-1 text-zinc-300 font-semibold">
-                          <Calendar className="h-3.5 w-3.5 text-emerald-400" />
+                          <Calendar className="h-3.5 w-3.5 text-[#00e676]" />
                           {formattedDate} @ {match.time}
                         </span>
                         <span className="text-zinc-600">•</span>
                         <span className="flex items-center gap-1">
-                          <MapPin className="h-3.5 w-3.5 text-emerald-400" />
+                          <MapPin className="h-3.5 w-3.5 text-[#00e676]" />
                           {match.location} ({match.fieldNumber})
                         </span>
                         <span className="text-zinc-600">•</span>
@@ -221,9 +221,9 @@ export const ScheduleList: React.FC = () => {
                     </div>
 
                     {/* Confirmed Pill & Switch Action */}
-                    <div className="flex items-center gap-3 self-start md:self-auto">
-                      <div className="text-right">
-                        <div className="text-xs text-zinc-400">Confirmed Squad</div>
+                    <div className="flex items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-zinc-800/80">
+                      <div className="text-left md:text-right">
+                        <div className="text-[11px] text-zinc-400">Confirmed Squad</div>
                         <div className="text-sm font-bold text-white">
                           {totalConfirmed} / {match.requiredPlayers} players
                         </div>
@@ -231,10 +231,10 @@ export const ScheduleList: React.FC = () => {
 
                       <button
                         onClick={() => setActiveMatchId(match.id)}
-                        className={`rounded-xl px-4 py-2 text-xs font-bold transition flex items-center gap-1.5 ${
+                        className={`rounded-xl px-4 py-2 text-xs font-bold transition flex items-center gap-1.5 active:scale-95 ${
                           isActive
-                            ? "bg-emerald-600 text-white"
-                            : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                            ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white"
+                            : "bg-[#090d12] border border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white"
                         }`}
                       >
                         <span>{isActive ? "Active in Hub" : "Set Active"}</span>
@@ -265,18 +265,18 @@ export const ScheduleList: React.FC = () => {
               return (
                 <div
                   key={match.id}
-                  className="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-5 sm:p-6"
+                  className="rounded-3xl border border-zinc-800/80 bg-[#111823] p-4 sm:p-6"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="rounded bg-zinc-800 px-2 py-0.5 text-xs font-bold text-zinc-300">
+                        <span className="rounded bg-[#090d12] px-2 py-0.5 text-xs font-bold text-zinc-300 border border-zinc-800">
                           Week {match.week}
                         </span>
                         <span
                           className={`rounded px-2 py-0.5 text-xs font-black uppercase ${
                             isWin
-                              ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                              ? "bg-emerald-500/20 text-[#00e676] border border-emerald-500/30"
                               : isDraw
                               ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
                               : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
@@ -286,7 +286,7 @@ export const ScheduleList: React.FC = () => {
                         </span>
                       </div>
 
-                      <h4 className="mt-2 text-lg font-bold text-white">
+                      <h4 className="mt-2 text-base sm:text-lg font-bold text-white">
                         vs {match.opponent}
                       </h4>
 
@@ -297,7 +297,7 @@ export const ScheduleList: React.FC = () => {
                       </div>
 
                       {match.notes && (
-                        <p className="mt-2 text-xs text-zinc-300 italic bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800">
+                        <p className="mt-2 text-xs text-zinc-300 italic bg-[#090d12] p-2.5 rounded-xl border border-zinc-800">
                           &ldquo;{match.notes}&rdquo;
                         </p>
                       )}
@@ -305,12 +305,12 @@ export const ScheduleList: React.FC = () => {
 
                     {/* Final Score Display */}
                     <div className="flex items-center gap-3 self-end sm:self-auto">
-                      <div className="flex items-center gap-2 rounded-2xl bg-zinc-950 px-5 py-3 border border-zinc-800">
+                      <div className="flex items-center gap-2 rounded-2xl bg-[#090d12] px-5 py-3 border border-zinc-800">
                         <div className="text-center">
                           <div className="text-[10px] font-bold text-zinc-400 uppercase">
                             {teamSettings.name.split(" ")[0]}
                           </div>
-                          <div className="text-2xl font-black text-white">
+                          <div className="text-xl sm:text-2xl font-black text-white">
                             {match.score.us}
                           </div>
                         </div>
@@ -319,7 +319,7 @@ export const ScheduleList: React.FC = () => {
                           <div className="text-[10px] font-bold text-zinc-400 uppercase">
                             Opp
                           </div>
-                          <div className="text-2xl font-black text-zinc-400">
+                          <div className="text-xl sm:text-2xl font-black text-zinc-400">
                             {match.score.opponent}
                           </div>
                         </div>
@@ -336,7 +336,7 @@ export const ScheduleList: React.FC = () => {
       {/* Add Match Modal */}
       {isAddMatchOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl">
+          <div className="w-full max-w-lg rounded-3xl border border-zinc-800 bg-[#111823] p-6 shadow-2xl">
             <h4 className="text-xl font-bold text-white">Schedule New Fixture</h4>
             <p className="mt-1 text-xs text-zinc-400">
               Add an upcoming match from the official NYC Footy league schedule.
@@ -354,7 +354,7 @@ export const ScheduleList: React.FC = () => {
                     value={newOpponent}
                     onChange={(e) => setNewOpponent(e.target.value)}
                     placeholder="e.g. Astoria FC"
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -366,7 +366,7 @@ export const ScheduleList: React.FC = () => {
                     required
                     value={newWeek}
                     onChange={(e) => setNewWeek(Number(e.target.value))}
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -381,7 +381,7 @@ export const ScheduleList: React.FC = () => {
                     required
                     value={newDate}
                     onChange={(e) => setNewDate(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -393,7 +393,7 @@ export const ScheduleList: React.FC = () => {
                     required
                     value={newTime}
                     onChange={(e) => setNewTime(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -406,7 +406,7 @@ export const ScheduleList: React.FC = () => {
                   <select
                     value={newLocation}
                     onChange={(e) => setNewLocation(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   >
                     <option value="Bushwick Inlet Park (Williamsburg)">Bushwick Inlet Park</option>
                     <option value="Pier 40 (Hudson River Park)">Pier 40</option>
@@ -424,7 +424,7 @@ export const ScheduleList: React.FC = () => {
                     value={newField}
                     onChange={(e) => setNewField(e.target.value)}
                     placeholder="e.g. Field 1 (Turf)"
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -466,7 +466,7 @@ export const ScheduleList: React.FC = () => {
                   value={newNotes}
                   onChange={(e) => setNewNotes(e.target.value)}
                   placeholder="e.g. Bring match ball, rain expected"
-                  className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
@@ -480,7 +480,7 @@ export const ScheduleList: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-emerald-600 px-5 py-2 text-xs font-bold text-white hover:bg-emerald-500 transition"
+                  className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-2 text-xs font-bold text-white hover:from-emerald-500 hover:to-teal-500 transition"
                 >
                   Add to Schedule
                 </button>

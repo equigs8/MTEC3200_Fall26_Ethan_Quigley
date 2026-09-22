@@ -149,11 +149,11 @@ export const CaptainToolsModal: React.FC<CaptainToolsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-zinc-800 bg-zinc-900 p-6 sm:p-8 shadow-2xl">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-zinc-800/80 bg-[#111823] p-6 sm:p-8 shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+        <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/20 text-[#00e676] border border-emerald-500/30">
               <Settings className="h-5 w-5" />
             </div>
             <div>

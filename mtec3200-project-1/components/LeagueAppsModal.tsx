@@ -275,9 +275,9 @@ END:VCALENDAR`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-zinc-800 bg-zinc-900 p-6 sm:p-8 shadow-2xl">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-zinc-800/80 bg-[#111823] p-6 sm:p-8 shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+        <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black text-sm border border-blue-400/30 shadow-lg">
               LA

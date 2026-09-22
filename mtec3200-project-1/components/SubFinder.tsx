@@ -84,19 +84,19 @@ export const SubFinder: React.FC = () => {
   const confirmedSubsList = subs.filter((s) => activeMatch.subsConfirmed.includes(s.id));
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Sub Pipeline Header & Shortage Diagnostic */}
-      <div className="rounded-3xl border border-zinc-800 bg-zinc-900/90 p-6 shadow-xl backdrop-blur-md sm:p-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-800/80 pb-6">
+      <div className="rounded-3xl border border-zinc-800/80 bg-[#111823] p-5 sm:p-8 shadow-xl backdrop-blur-md">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-800/80 pb-5">
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400">
               <Sparkles className="h-3.5 w-3.5" />
               Automated Sub Dispatcher
             </div>
-            <h3 className="mt-1 text-2xl font-black text-white sm:text-3xl">
+            <h3 className="mt-1 text-xl sm:text-2xl font-black text-white">
               Sub Outreach Pipeline
             </h3>
-            <p className="mt-1 text-sm text-zinc-400">
+            <p className="mt-1 text-xs sm:text-sm text-zinc-400">
               Never scramble last-minute. 1-click WhatsApp & SMS contact with prioritized subs.
             </p>
           </div>
@@ -104,7 +104,7 @@ export const SubFinder: React.FC = () => {
           {/* Quick Add Sub Button */}
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-500 transition shadow-lg shadow-emerald-950/50 self-start md:self-auto"
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-bold text-white hover:from-emerald-500 hover:to-teal-500 transition shadow-lg shadow-emerald-950/50 self-start md:self-auto active:scale-95"
           >
             <Plus className="h-4 w-4" />
             <span>Add Sub to Pool</span>
@@ -112,12 +112,12 @@ export const SubFinder: React.FC = () => {
         </div>
 
         {/* Shortage Diagnostic Banner */}
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
+          <div className="rounded-2xl border border-zinc-800/80 bg-[#090d12] p-4">
             <div className="text-xs font-semibold text-zinc-400">STATUS DIAGNOSTIC</div>
-            <div className="mt-1 text-xl font-bold text-white flex items-center gap-2">
+            <div className="mt-1 text-lg sm:text-xl font-bold text-white flex items-center gap-2">
               {matchMetrics.isReady ? (
-                <span className="text-emerald-400 flex items-center gap-1.5">
+                <span className="text-[#00e676] flex items-center gap-1.5">
                   <CheckCircle2 className="h-5 w-5" /> Full Squad
                 </span>
               ) : (
@@ -134,12 +134,12 @@ export const SubFinder: React.FC = () => {
           <div
             className={`rounded-2xl border p-4 ${
               matchMetrics.femaleShortage > 0
-                ? "border-amber-700 bg-amber-950/30"
-                : "border-zinc-800 bg-zinc-950"
+                ? "border-amber-700/80 bg-amber-950/30"
+                : "border-zinc-800/80 bg-[#090d12]"
             }`}
           >
             <div className="text-xs font-semibold text-zinc-400">NYC FOOTY CO-ED RULE</div>
-            <div className="mt-1 text-xl font-bold text-white">
+            <div className="mt-1 text-lg sm:text-xl font-bold text-white">
               {matchMetrics.femaleConfirmed} / {matchMetrics.minFemale} Women
             </div>
             <div className="text-xs mt-1">
@@ -148,17 +148,17 @@ export const SubFinder: React.FC = () => {
                   ⚠️ Priority: Reach out to female subs below
                 </span>
               ) : (
-                <span className="text-emerald-400">✓ Gender balance met</span>
+                <span className="text-[#00e676]">✓ Gender balance met</span>
               )}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+          <div className="rounded-2xl border border-zinc-800/80 bg-[#090d12] p-4">
             <div className="text-xs font-semibold text-zinc-400">CONFIRMED SUBS ON ROSTER</div>
-            <div className="mt-1 text-xl font-bold text-white">
+            <div className="mt-1 text-lg sm:text-xl font-bold text-white">
               {confirmedSubsList.length} Active
             </div>
-            <div className="text-xs text-zinc-400 mt-1">
+            <div className="text-xs text-zinc-400 mt-1 truncate">
               {confirmedSubsList.length > 0
                 ? confirmedSubsList.map((s) => s.name.split(" ")[0]).join(", ")
                 : "No subs locked in yet"}
@@ -168,18 +168,18 @@ export const SubFinder: React.FC = () => {
 
         {/* Co-ed Rule Prompt Action */}
         {matchMetrics.femaleShortage > 0 && (
-          <div className="mt-4 rounded-xl bg-purple-950/50 border border-purple-800/60 p-3.5 flex items-center justify-between text-xs text-purple-200">
+          <div className="mt-4 rounded-xl bg-purple-950/50 border border-purple-800/60 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-purple-200">
             <div className="flex items-center gap-2">
               <Shield className="h-4 w-4 text-purple-400 shrink-0" />
               <span>
-                To avoid playing a player down, reach out to Tier 1 female subs first (Emma Rodriguez & Olivia Taylor).
+                To satisfy NYC Footy 7v7 co-ed balance, reach out to female subs first.
               </span>
             </div>
             <button
               onClick={() => setFilterGender("female")}
-              className="font-bold underline text-purple-300 hover:text-white shrink-0 ml-2"
+              className="font-bold underline text-purple-300 hover:text-white shrink-0"
             >
-              Filter Female Subs
+              Filter Women Subs
             </button>
           </div>
         )}
@@ -189,43 +189,43 @@ export const SubFinder: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           {/* Gender Filter */}
-          <div className="flex items-center gap-1 rounded-xl bg-zinc-900 p-1 border border-zinc-800 text-xs">
+          <div className="flex items-center gap-1 rounded-xl bg-[#111823] p-1 border border-zinc-800 text-xs">
             <button
               onClick={() => setFilterGender("all")}
               className={`rounded-lg px-2.5 py-1 font-medium transition ${
-                filterGender === "all" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"
+                filterGender === "all" ? "bg-zinc-800 text-white font-bold" : "text-zinc-400 hover:text-white"
               }`}
             >
-              All Genders
+              All
             </button>
             <button
               onClick={() => setFilterGender("female")}
               className={`rounded-lg px-2.5 py-1 font-medium transition ${
                 filterGender === "female"
-                  ? "bg-purple-600 text-white"
+                  ? "bg-purple-600 text-white font-bold"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
-              Women Only
+              Women
             </button>
             <button
               onClick={() => setFilterGender("male")}
               className={`rounded-lg px-2.5 py-1 font-medium transition ${
                 filterGender === "male"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-blue-600 text-white font-bold"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
-              Men Only
+              Men
             </button>
           </div>
 
           {/* Tier Filter */}
-          <div className="flex items-center gap-1 rounded-xl bg-zinc-900 p-1 border border-zinc-800 text-xs">
+          <div className="flex items-center gap-1 rounded-xl bg-[#111823] p-1 border border-zinc-800 text-xs">
             <button
               onClick={() => setFilterTier("all")}
               className={`rounded-lg px-2.5 py-1 font-medium transition ${
-                filterTier === "all" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"
+                filterTier === "all" ? "bg-zinc-800 text-white font-bold" : "text-zinc-400 hover:text-white"
               }`}
             >
               All Tiers
@@ -233,15 +233,15 @@ export const SubFinder: React.FC = () => {
             <button
               onClick={() => setFilterTier(1)}
               className={`rounded-lg px-2.5 py-1 font-medium transition ${
-                filterTier === 1 ? "bg-emerald-600 text-white" : "text-zinc-400 hover:text-white"
+                filterTier === 1 ? "bg-emerald-600 text-white font-bold" : "text-zinc-400 hover:text-white"
               }`}
             >
-              Tier 1 (Go-To)
+              Tier 1
             </button>
             <button
               onClick={() => setFilterTier(2)}
               className={`rounded-lg px-2.5 py-1 font-medium transition ${
-                filterTier === 2 ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"
+                filterTier === 2 ? "bg-zinc-800 text-white font-bold" : "text-zinc-400 hover:text-white"
               }`}
             >
               Tier 2
@@ -249,21 +249,21 @@ export const SubFinder: React.FC = () => {
           </div>
 
           {/* Position Filter */}
-          <div className="flex items-center gap-1 rounded-xl bg-zinc-900 p-1 border border-zinc-800 text-xs">
+          <div className="flex items-center gap-1 rounded-xl bg-[#111823] p-1 border border-zinc-800 text-xs">
             <button
               onClick={() => setFilterPosition("all")}
-              className={`rounded-lg px-2.5 py-1 font-medium transition ${
-                filterPosition === "all" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"
+              className={`rounded-lg px-2 py-1 font-medium transition ${
+                filterPosition === "all" ? "bg-zinc-800 text-white font-bold" : "text-zinc-400 hover:text-white"
               }`}
             >
-              All Pos
+              All
             </button>
             {["GK", "DEF", "MID", "FWD"].map((pos) => (
               <button
                 key={pos}
                 onClick={() => setFilterPosition(pos)}
-                className={`rounded-lg px-2.5 py-1 font-medium transition ${
-                  filterPosition === pos ? "bg-emerald-600 text-white" : "text-zinc-400 hover:text-white"
+                className={`rounded-lg px-2 py-1 font-medium transition ${
+                  filterPosition === pos ? "bg-emerald-600 text-white font-bold" : "text-zinc-400 hover:text-white"
                 }`}
               >
                 {pos}
@@ -286,19 +286,19 @@ export const SubFinder: React.FC = () => {
           return (
             <div
               key={sub.id}
-              className={`rounded-3xl border p-5 transition-all relative overflow-hidden ${
+              className={`rounded-3xl border p-4 sm:p-5 transition-all relative overflow-hidden ${
                 isConfirmed
-                  ? "border-emerald-500/70 bg-gradient-to-b from-emerald-950/40 to-zinc-950 ring-1 ring-emerald-500/40"
+                  ? "border-emerald-500/70 bg-gradient-to-b from-emerald-950/40 to-[#090d12] ring-1 ring-emerald-500/40"
                   : isContacted
-                  ? "border-amber-500/50 bg-gradient-to-b from-amber-950/20 to-zinc-950"
-                  : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700"
+                  ? "border-amber-500/50 bg-gradient-to-b from-amber-950/20 to-[#090d12]"
+                  : "border-zinc-800/80 bg-[#111823] hover:border-zinc-700"
               }`}
             >
               {/* Top Header */}
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h4 className="text-lg font-bold text-white">{sub.name}</h4>
+                    <h4 className="text-base sm:text-lg font-bold text-white">{sub.name}</h4>
                     <span
                       className={`rounded px-1.5 py-0.2 text-[10px] font-bold ${
                         sub.gender === "female"
@@ -308,7 +308,7 @@ export const SubFinder: React.FC = () => {
                     >
                       {sub.gender === "female" ? "Woman" : "Man"}
                     </span>
-                    <span className="rounded bg-zinc-800 px-1.5 py-0.2 text-[10px] font-semibold text-zinc-300">
+                    <span className="rounded bg-[#090d12] px-1.5 py-0.2 text-[10px] font-semibold text-zinc-300 border border-zinc-800">
                       Tier {sub.tier}
                     </span>
                   </div>
@@ -320,7 +320,7 @@ export const SubFinder: React.FC = () => {
                     <span className="text-zinc-600">•</span>
                     <span className="flex items-center gap-0.5 text-amber-400">
                       <Star className="h-3 w-3 fill-amber-400" />
-                      {sub.reliabilityScore}.0 Reliability
+                      {sub.reliabilityScore}.0
                     </span>
                   </div>
                 </div>
@@ -328,30 +328,30 @@ export const SubFinder: React.FC = () => {
                 {/* Status Pill */}
                 <div>
                   {isConfirmed ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30">
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Playing Week {activeMatch.week}
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-1 text-xs font-bold text-[#00e676] border border-emerald-500/30">
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Playing
                     </span>
                   ) : isContacted ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-1 text-xs font-bold text-amber-300 border border-amber-500/30 animate-pulse">
-                      <Clock className="h-3.5 w-3.5" /> Awaiting Reply
+                      <Clock className="h-3.5 w-3.5" /> Waiting Reply
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-400">
-                      Available to Call
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#090d12] px-2.5 py-1 text-xs font-medium text-zinc-400 border border-zinc-800">
+                      Available
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Notes & Last Played */}
+              {/* Notes */}
               {sub.notes && (
-                <p className="mt-3 text-xs text-zinc-400 bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800/80">
+                <p className="mt-3 text-xs text-zinc-400 bg-[#090d12] p-2.5 rounded-xl border border-zinc-800/80">
                   {sub.notes}
                 </p>
               )}
 
               {/* Contact and Actions Row */}
-              <div className="mt-4 pt-4 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-3">
+              <div className="mt-4 pt-3.5 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-2.5">
                 <div className="text-xs text-zinc-400 font-mono">
                   {sub.phone}
                 </div>
@@ -360,7 +360,7 @@ export const SubFinder: React.FC = () => {
                   {/* WhatsApp Direct Dispatch */}
                   <button
                     onClick={() => handleOutreach(sub.id, "whatsapp")}
-                    className="flex items-center gap-1.5 rounded-xl bg-emerald-700/80 hover:bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition shadow-sm"
+                    className="flex items-center gap-1.5 rounded-xl bg-emerald-700/80 hover:bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition shadow-sm active:scale-95"
                     title="Open WhatsApp with pre-filled match invite"
                   >
                     <MessageCircle className="h-3.5 w-3.5" />
@@ -370,7 +370,7 @@ export const SubFinder: React.FC = () => {
                   {/* SMS Text */}
                   <button
                     onClick={() => handleOutreach(sub.id, "sms")}
-                    className="flex items-center gap-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition"
+                    className="flex items-center gap-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition active:scale-95"
                     title="Send SMS"
                   >
                     <Phone className="h-3.5 w-3.5" />
@@ -381,14 +381,14 @@ export const SubFinder: React.FC = () => {
                   {isConfirmed ? (
                     <button
                       onClick={() => removeSubFromMatch(sub.id, activeMatch.id)}
-                      className="rounded-xl border border-rose-900 bg-rose-950/60 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-900"
+                      className="rounded-xl border border-rose-900 bg-rose-950/60 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-900 active:scale-95"
                     >
                       Remove
                     </button>
                   ) : (
                     <button
                       onClick={() => confirmSubForMatch(sub.id, activeMatch.id)}
-                      className="rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-500 shadow-sm"
+                      className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-3.5 py-1.5 text-xs font-bold text-white hover:from-emerald-500 hover:to-teal-500 shadow-sm active:scale-95"
                     >
                       Confirm In
                     </button>
@@ -403,7 +403,7 @@ export const SubFinder: React.FC = () => {
       {/* Add Sub Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-3xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl">
+          <div className="w-full max-w-lg rounded-3xl border border-zinc-800 bg-[#111823] p-6 shadow-2xl">
             <h4 className="text-xl font-bold text-white">Add New Substitute</h4>
             <p className="mt-1 text-xs text-zinc-400">
               Add someone to your team&apos;s sub directory for fast outreach when players drop out.
@@ -420,7 +420,7 @@ export const SubFinder: React.FC = () => {
                   value={newSubName}
                   onChange={(e) => setNewSubName(e.target.value)}
                   placeholder="e.g. Taylor Smith"
-                  className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
@@ -435,7 +435,7 @@ export const SubFinder: React.FC = () => {
                     value={newSubPhone}
                     onChange={(e) => setNewSubPhone(e.target.value)}
                     placeholder="e.g. 917-555-0199"
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
@@ -446,7 +446,7 @@ export const SubFinder: React.FC = () => {
                   <select
                     value={newSubGender}
                     onChange={(e) => setNewSubGender(e.target.value as GenderCategory)}
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   >
                     <option value="female">Female (Co-ed Eligible)</option>
                     <option value="male">Male</option>
@@ -463,7 +463,7 @@ export const SubFinder: React.FC = () => {
                   <select
                     value={newSubPositions[0]}
                     onChange={(e) => setNewSubPositions([e.target.value as Position])}
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   >
                     <option value="MID">Midfielder (MID)</option>
                     <option value="DEF">Defender (DEF)</option>
@@ -479,7 +479,7 @@ export const SubFinder: React.FC = () => {
                   <select
                     value={newSubTier}
                     onChange={(e) => setNewSubTier(Number(e.target.value) as 1 | 2 | 3)}
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                   >
                     <option value={1}>Tier 1: Go-to starter</option>
                     <option value={2}>Tier 2: Reliable friend</option>
@@ -497,7 +497,7 @@ export const SubFinder: React.FC = () => {
                   value={newSubNotes}
                   onChange={(e) => setNewSubNotes(e.target.value)}
                   placeholder="e.g. Lives in Williamsburg, plays college ball, needs 1 day heads up"
-                  className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
                 />
               </div>
 
@@ -511,7 +511,7 @@ export const SubFinder: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-emerald-600 px-5 py-2 text-xs font-bold text-white hover:bg-emerald-500 transition"
+                  className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-2 text-xs font-bold text-white hover:from-emerald-500 hover:to-teal-500 transition"
                 >
                   Save Sub
                 </button>
