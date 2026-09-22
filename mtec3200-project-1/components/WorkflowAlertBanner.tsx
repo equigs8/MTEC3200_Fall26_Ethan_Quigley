@@ -12,6 +12,8 @@ import {
   UserCheck,
   UserX,
 } from "lucide-react";
+import { soundFx } from "@/lib/soundEffects";
+import { triggerSquadReadyConfetti } from "@/lib/confetti";
 
 interface WorkflowAlertBannerProps {
   onOpenSubPortalWithFilter?: (gender?: "female") => void;
@@ -127,22 +129,32 @@ export const WorkflowAlertBanner: React.FC<WorkflowAlertBannerProps> = ({
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => simulatePollScenario("female_drop")}
-            className="rounded-lg bg-rose-950/60 border border-rose-800/40 px-2 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-900/60 transition"
+            onClick={() => {
+              simulatePollScenario("female_drop");
+              soundFx.playWhistle();
+            }}
+            className="rounded-lg bg-rose-950/60 border border-rose-800/40 px-2 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-900/60 transition active:scale-95"
             title="Simulate a female player dropping out, triggering a co-ed shortage"
           >
             Simulate Female Drop-out
           </button>
           <button
-            onClick={() => simulatePollScenario("mass_drop")}
-            className="rounded-lg bg-amber-950/60 border border-amber-800/40 px-2 py-1 text-[10px] font-semibold text-amber-300 hover:bg-amber-900/60 transition"
+            onClick={() => {
+              simulatePollScenario("mass_drop");
+              soundFx.playWhistle();
+            }}
+            className="rounded-lg bg-amber-950/60 border border-amber-800/40 px-2 py-1 text-[10px] font-semibold text-amber-300 hover:bg-amber-900/60 transition active:scale-95"
             title="Simulate multiple last-minute dropouts"
           >
             Simulate 3 Drop-outs
           </button>
           <button
-            onClick={() => simulatePollScenario("full_squad")}
-            className="rounded-lg bg-emerald-950/60 border border-emerald-800/40 px-2 py-1 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-900/60 transition"
+            onClick={() => {
+              simulatePollScenario("full_squad");
+              soundFx.playSuccess();
+              triggerSquadReadyConfetti();
+            }}
+            className="rounded-lg bg-emerald-950/60 border border-emerald-800/40 px-2 py-1 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-900/60 transition active:scale-95"
             title="Simulate all squad members responding Yes"
           >
             Reset to Full Squad

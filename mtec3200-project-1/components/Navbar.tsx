@@ -24,6 +24,7 @@ import {
   Show,
   UserButton,
 } from "@clerk/nextjs";
+import { footyClerkTheme } from "@/lib/clerkTheme";
 
 interface NavbarProps {
   activeTab: string;
@@ -300,24 +301,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center">
               <Show when="signed-in">
                 <UserButton
-                  appearance={{
-                    elements: {
-                      userButtonAvatarBox: "h-8 w-8 rounded-xl border border-emerald-500/40",
-                    },
-                  }}
+                  appearance={footyClerkTheme}
                 />
               </Show>
 
               <Show when="signed-out">
                 <div className="flex items-center gap-1.5">
                   <SignInButton mode="modal">
-                    <button className="flex items-center gap-1 rounded-xl border border-zinc-700 bg-[#111823] px-2.5 py-1.5 text-xs font-semibold text-zinc-200 hover:border-emerald-500 hover:text-white transition">
-                      <LogIn className="h-3.5 w-3.5" />
+                    <button className="flex items-center gap-1.5 rounded-xl border border-zinc-700 bg-[#111823] px-3 py-1.5 text-xs font-semibold text-zinc-200 hover:border-emerald-500 hover:text-white transition active:scale-95 shadow-sm">
+                      <LogIn className="h-3.5 w-3.5 text-[#00e676]" />
                       <span>Sign In</span>
                     </button>
                   </SignInButton>
                   <SignUpButton mode="modal">
-                    <button className="hidden sm:flex items-center gap-1 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-500 transition shadow-md shadow-emerald-950/40">
+                    <button className="hidden sm:flex items-center gap-1 rounded-xl bg-emerald-500 px-3.5 py-1.5 text-xs font-bold text-zinc-950 hover:bg-emerald-400 transition shadow-md shadow-emerald-950/40 active:scale-95">
                       <span>Sign Up</span>
                     </button>
                   </SignUpButton>

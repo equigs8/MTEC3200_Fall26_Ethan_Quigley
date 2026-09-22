@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { footyClerkTheme } from "@/lib/clerkTheme";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -42,7 +43,10 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col bg-[#090d12] text-zinc-100 font-sans selection:bg-emerald-500/30 selection:text-emerald-300 pb-16 md:pb-0"
       >
-        <ClerkProvider publishableKey={publishableKey}>
+        <ClerkProvider
+          publishableKey={publishableKey}
+          appearance={footyClerkTheme}
+        >
           {children}
         </ClerkProvider>
       </body>

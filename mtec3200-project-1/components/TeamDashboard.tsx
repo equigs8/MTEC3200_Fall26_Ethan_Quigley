@@ -57,7 +57,7 @@ function TeamDashboardInner() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d12] text-zinc-100 flex flex-col font-sans selection:bg-emerald-500/30 selection:text-emerald-300">
+    <div className="min-h-screen pitch-grid-bg text-zinc-100 flex flex-col font-sans selection:bg-emerald-500/30 selection:text-emerald-300">
       {/* Navigation Bar & Mobile App Bar */}
       <Navbar
         activeTab={activeTab}
@@ -100,7 +100,7 @@ function TeamDashboardInner() {
               {/* Poll Glimpse Card */}
               <div
                 onClick={() => setActiveTab("poll")}
-                className="group cursor-pointer rounded-3xl border border-zinc-800/80 bg-[#111823] p-5 sm:p-6 transition-all hover:border-[#00e676]/60 hover:bg-[#161f2e] shadow-lg active:scale-98"
+                className="group cursor-pointer rounded-3xl glass-panel glass-panel-hover p-5 sm:p-6 shadow-xl active:scale-98"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500/20 text-[#00e676] border border-emerald-500/30">
@@ -128,7 +128,7 @@ function TeamDashboardInner() {
               {/* Free Agent Sub Portal Glimpse Card */}
               <div
                 onClick={() => handleOpenSubPortalWithFilter()}
-                className="group cursor-pointer rounded-3xl border border-zinc-800/80 bg-[#111823] p-5 sm:p-6 transition-all hover:border-amber-500/60 hover:bg-[#161f2e] shadow-lg active:scale-98"
+                className="group cursor-pointer rounded-3xl glass-panel glass-panel-hover p-5 sm:p-6 shadow-xl active:scale-98"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
@@ -138,7 +138,7 @@ function TeamDashboardInner() {
                     Sub Pool <ArrowRight className="h-3 w-3" />
                   </span>
                 </div>
-                <h3 className="mt-4 text-base sm:text-lg font-bold text-white">Free Agent & Sub Portal</h3>
+                <h3 className="mt-4 text-base sm:text-lg font-bold text-white">Free Agent &amp; Sub Portal</h3>
                 <p className="mt-1 text-xs text-zinc-400">
                   Find available subs by skill tier and female quota. 1-click WhatsApp/SMS match invites.
                 </p>
@@ -158,7 +158,7 @@ function TeamDashboardInner() {
               {/* Tactical Pitch Glimpse Card */}
               <div
                 onClick={() => setActiveTab("tactics")}
-                className="group cursor-pointer rounded-3xl border border-zinc-800/80 bg-[#111823] p-5 sm:p-6 transition-all hover:border-teal-500/60 hover:bg-[#161f2e] shadow-lg active:scale-98"
+                className="group cursor-pointer rounded-3xl glass-panel glass-panel-hover p-5 sm:p-6 shadow-xl active:scale-98"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-500/20 text-teal-400 border border-teal-500/30">
@@ -203,38 +203,49 @@ function TeamDashboardInner() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-800/80 bg-[#090d12] py-6 text-center text-xs text-zinc-500 pb-20 md:pb-6">
-        <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-zinc-300">{teamSettings.name}</span>
-            <span>•</span>
-            <span className="text-zinc-400">NYC Footy Team Hub & Free Agent Portal</span>
-            <span className="hidden sm:inline text-zinc-600">•</span>
-            <span className="hidden sm:inline text-emerald-400/80 italic">
-              Powered by Clerk Auth
-            </span>
+      <footer className="border-t border-zinc-800/80 bg-[#090d12]/90 backdrop-blur-md py-8 text-center text-xs text-zinc-500 pb-20 md:pb-8">
+        <div className="mx-auto max-w-7xl px-4 flex flex-col items-center justify-between gap-4">
+          {/* Street Footy Team Banner */}
+          <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-zinc-400 bg-[#111823] px-4 py-2 rounded-2xl border border-zinc-800">
+            <span className="text-[#00e676] font-bold">⚽ Bushwick Borough FC</span>
+            <span className="text-zinc-600">•</span>
+            <span className="text-zinc-300 italic">&ldquo;Fast Turf, Cold Beers, Zero Forfeits&rdquo; 🍺</span>
+            <span className="text-zinc-600">•</span>
+            <span className="text-emerald-400">South Williamsburg P3 Co-Ed</span>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleOpenShare}
-              className="text-zinc-400 hover:text-[#00e676] transition"
-            >
-              WhatsApp Share
-            </button>
-            <span>•</span>
-            <button
-              onClick={() => setIsLeagueAppsOpen(true)}
-              className="text-zinc-400 hover:text-sky-400 transition"
-            >
-              LeagueApps Sync
-            </button>
-            <span>•</span>
-            <button
-              onClick={handleOpenSettings}
-              className="text-zinc-400 hover:text-[#00e676] transition"
-            >
-              Settings
-            </button>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-3 pt-2">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-zinc-300">{teamSettings.name}</span>
+              <span>•</span>
+              <span className="text-zinc-400">NYC Footy Team Hub &amp; Free Agent Portal</span>
+              <span className="hidden sm:inline text-zinc-600">•</span>
+              <span className="hidden sm:inline text-emerald-400/80 font-medium">
+                Auth by Clerk
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleOpenShare}
+                className="text-zinc-400 hover:text-[#00e676] transition"
+              >
+                WhatsApp Share
+              </button>
+              <span>•</span>
+              <button
+                onClick={() => setIsLeagueAppsOpen(true)}
+                className="text-zinc-400 hover:text-sky-400 transition"
+              >
+                LeagueApps Sync
+              </button>
+              <span>•</span>
+              <button
+                onClick={handleOpenSettings}
+                className="text-zinc-400 hover:text-[#00e676] transition"
+              >
+                Settings
+              </button>
+            </div>
           </div>
         </div>
       </footer>

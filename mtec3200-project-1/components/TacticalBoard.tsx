@@ -12,6 +12,7 @@ import {
   Move,
   UserCheck,
 } from "lucide-react";
+import { soundFx } from "@/lib/soundEffects";
 
 export const TacticalBoard: React.FC = () => {
   const {
@@ -155,6 +156,7 @@ export const TacticalBoard: React.FC = () => {
     } else {
       updateTacticalSlot(activeMatch.id, targetSlotId, playerId);
     }
+    soundFx.playPop();
 
     setDraggedPlayerId(null);
     setDragSourceSlot(null);
@@ -167,6 +169,7 @@ export const TacticalBoard: React.FC = () => {
 
     if (sourceSlot && sourceSlot !== "bench") {
       updateTacticalSlot(activeMatch.id, sourceSlot, "");
+      soundFx.playPop();
     }
 
     setDraggedPlayerId(null);
@@ -178,12 +181,14 @@ export const TacticalBoard: React.FC = () => {
     if (selectedMobilePlayerId) {
       // Assign selected player to slot
       updateTacticalSlot(activeMatch.id, slotId, selectedMobilePlayerId);
+      soundFx.playPop();
       setSelectedMobilePlayerId(null);
     } else {
       // If already has player, select them to reassign or tap again to bench
       const occupant = lineup.positions[slotId];
       if (occupant) {
         setSelectedMobilePlayerId(occupant);
+        soundFx.playPop();
       }
     }
   };
@@ -313,7 +318,9 @@ export const TacticalBoard: React.FC = () => {
           <div className="pointer-events-none absolute inset-3 sm:inset-4 rounded-2xl border-2 border-white/40" />
           <div className="pointer-events-none absolute left-3 sm:left-4 right-3 sm:right-4 top-1/2 -translate-y-1/2 border-t-2 border-white/40" />
           <div className="pointer-events-none absolute left-1/2 top-1/2 h-24 w-24 sm:h-28 sm:w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/40" />
-          <div className="pointer-events-none absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60" />
+          <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm select-none animate-subtle-bounce opacity-80" title="Kickoff Spot">
+            ⚽
+          </div>
           <div className="pointer-events-none absolute left-1/2 top-3 sm:top-4 h-20 w-40 sm:h-24 sm:w-48 -translate-x-1/2 border-b-2 border-l-2 border-r-2 border-white/40 rounded-b-xl" />
           <div className="pointer-events-none absolute bottom-3 sm:bottom-4 left-1/2 h-20 w-40 sm:h-24 sm:w-48 -translate-x-1/2 border-t-2 border-l-2 border-r-2 border-white/40 rounded-t-xl" />
           <div className="pointer-events-none absolute bottom-10 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-white/60" />

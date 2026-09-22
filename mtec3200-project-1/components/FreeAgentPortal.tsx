@@ -17,7 +17,10 @@ import {
   AlertTriangle,
   X,
   Plus,
+  Zap,
 } from "lucide-react";
+import { triggerSquadReadyConfetti } from "@/lib/confetti";
+import { soundFx } from "@/lib/soundEffects";
 
 interface FreeAgentPortalProps {
   initialGenderFilter?: "female" | "all";
@@ -56,6 +59,7 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
   if (!activeMatch) return null;
 
   const handleOutreach = (subId: string, channel: "whatsapp" | "sms") => {
+    soundFx.playPop();
     const url = triggerSubOutreach(subId, activeMatch.id, channel);
     if (url) {
       window.open(url, "_blank");
@@ -116,7 +120,18 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
+          <div className="flex items-center gap-3.5 self-start md:self-auto shrink-0">
+            {/* Visual Radar Scanner Element */}
+            <div className="relative h-11 w-11 rounded-2xl border border-emerald-500/40 bg-emerald-950/40 overflow-hidden flex items-center justify-center shadow-lg shadow-emerald-950/40 shrink-0" title="Sub Radar Active • Scanning Brooklyn / Manhattan">
+              <div className="absolute inset-1.5 rounded-full border border-emerald-500/20" />
+              <div className="absolute inset-3 rounded-full border border-emerald-500/30" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-emerald-400/25 to-transparent animate-radar-sweep pointer-events-none" />
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00e676] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00e676]" />
+              </span>
+            </div>
+
             <button
               onClick={() => setIsRegisterModalOpen(true)}
               className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-500 shadow-lg shadow-emerald-950/40 transition active:scale-95"
@@ -382,14 +397,21 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
 
                 {isConfirmed ? (
                   <button
-                    onClick={() => removeSubFromMatch(sub.id, activeMatch.id)}
-                    className="rounded-xl bg-emerald-600/30 border border-emerald-500/40 px-3 py-1.5 text-xs font-bold text-emerald-300 hover:bg-rose-950/60 hover:text-rose-300 transition"
+                    onClick={() => {
+                      removeSubFromMatch(sub.id, activeMatch.id);
+                      soundFx.playPop();
+                    }}
+                    className="rounded-xl bg-emerald-600/30 border border-emerald-500/40 px-3 py-1.5 text-xs font-bold text-emerald-300 hover:bg-rose-950/60 hover:text-rose-300 transition active:scale-95"
                   >
                     ✓ Confirmed
                   </button>
                 ) : (
                   <button
-                    onClick={() => confirmSubForMatch(sub.id, activeMatch.id)}
+                    onClick={() => {
+                      confirmSubForMatch(sub.id, activeMatch.id);
+                      soundFx.playSuccess();
+                      triggerSquadReadyConfetti();
+                    }}
                     className="rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-500 shadow-md shadow-emerald-950/40 transition active:scale-95"
                   >
                     Add to Squad

@@ -13,7 +13,10 @@ import {
   AlertTriangle,
   Sparkles,
   Shield,
+  PartyPopper,
 } from "lucide-react";
+import { triggerRSVPConfetti } from "@/lib/confetti";
+import { soundFx } from "@/lib/soundEffects";
 
 interface AttendancePollProps {
   onGoToSubs: () => void;
@@ -57,10 +60,22 @@ export const AttendancePoll: React.FC<AttendancePollProps> = ({ onGoToSubs }) =>
 
   const handleVote = (status: RSVPStatus, reason?: string) => {
     updateRSVP(activeMatch.id, currentPlayer.id, status, reason);
+    if (status === "yes") {
+      triggerRSVPConfetti();
+      soundFx.playSuccess();
+    } else {
+      soundFx.playPop();
+    }
   };
 
   const handleQuickCaptainToggle = (playerId: string, newStatus: RSVPStatus) => {
     updateRSVP(activeMatch.id, playerId, newStatus);
+    if (newStatus === "yes") {
+      triggerRSVPConfetti();
+      soundFx.playSuccess();
+    } else {
+      soundFx.playPop();
+    }
   };
 
   // Group players by status

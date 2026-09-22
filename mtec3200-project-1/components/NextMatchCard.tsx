@@ -16,6 +16,7 @@ import {
   Flame,
   Award,
 } from "lucide-react";
+import { MatchHypeWidgets } from "@/components/MatchHypeWidgets";
 
 interface NextMatchCardProps {
   onGoToPoll: () => void;
@@ -285,8 +286,15 @@ export const NextMatchCard: React.FC<NextMatchCardProps> = ({
         </div>
       </div>
 
+      {/* Live Kickoff Countdown & Pitch Conditions */}
+      <MatchHypeWidgets match={activeMatch} />
+
       {/* Live Squad Health & Shortage Alert Banner */}
-      <div className="mt-5 rounded-2xl border border-zinc-800/80 bg-[#090d12]/95 p-4 sm:p-5">
+      <div className={`mt-5 rounded-2xl border p-4 sm:p-5 transition-all ${
+        matchMetrics.isReady
+          ? "border-emerald-500/40 bg-[#090d12]/95 shadow-lg shadow-emerald-950/20"
+          : "border-zinc-800/80 bg-[#090d12]/95"
+      }`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center justify-between mb-2">
@@ -309,16 +317,18 @@ export const NextMatchCard: React.FC<NextMatchCardProps> = ({
               </span>
             </div>
 
-            {/* Progress Bar */}
-            <div className="h-2.5 w-full rounded-full bg-zinc-800 overflow-hidden">
+            {/* Progress Bar with Shimmer Effect */}
+            <div className="h-2.5 w-full rounded-full bg-zinc-800 overflow-hidden relative">
               <div
-                className={`h-full transition-all duration-500 rounded-full ${
+                className={`h-full transition-all duration-500 rounded-full relative ${
                   matchMetrics.isReady
                     ? "bg-gradient-to-r from-emerald-500 to-[#00e676]"
                     : "bg-gradient-to-r from-amber-500 to-orange-400"
                 }`}
                 style={{ width: `${percentFull}%` }}
-              />
+              >
+                <div className="absolute inset-0 shimmer-badge opacity-40" />
+              </div>
             </div>
 
             {/* Co-ed Rule Check */}

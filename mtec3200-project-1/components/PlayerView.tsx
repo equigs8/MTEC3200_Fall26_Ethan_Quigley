@@ -17,7 +17,11 @@ import {
   Sparkles,
   UserCheck,
   Compass,
+  PartyPopper,
 } from "lucide-react";
+import { MatchHypeWidgets } from "@/components/MatchHypeWidgets";
+import { triggerRSVPConfetti } from "@/lib/confetti";
+import { soundFx } from "@/lib/soundEffects";
 
 interface PlayerViewProps {
   onOpenSubPortal: () => void;
@@ -58,17 +62,21 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
 
   const handleVote = (status: RSVPStatus) => {
     if (status === "maybe" || status === "no") {
+      soundFx.playPop();
       setPendingStatus(status);
       setShowReasonBox(true);
     } else {
       updateRSVP(activeMatch.id, matchingPlayer.id, "yes");
       setShowReasonBox(false);
+      triggerRSVPConfetti();
+      soundFx.playSuccess();
     }
   };
 
   const submitReason = () => {
     if (pendingStatus) {
       updateRSVP(activeMatch.id, matchingPlayer.id, pendingStatus, reasonInput.trim());
+      soundFx.playPop();
       setShowReasonBox(false);
       setReasonInput("");
       setPendingStatus(null);
@@ -197,13 +205,30 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
           </div>
         </div>
 
+        {/* Live Kickoff Countdown & Pitch Conditions */}
+        <MatchHypeWidgets match={activeMatch} />
+
         {/* 1-Tap RSVP Section */}
         <div className="rounded-2xl border border-zinc-800 bg-[#090d12] p-5">
+          {currentRSVP === "yes" && (
+            <div className="mb-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 p-3 flex items-center gap-3 animate-in fade-in">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 text-[#00e676] shrink-0">
+                <PartyPopper className="h-4 w-4 animate-bounce" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-white">You&apos;re locked in for Matchday! ⚽</div>
+                <div className="text-[11px] text-emerald-300">
+                  Ready for kickoff at {activeMatch.time} EDT. Check your tactical slot and teammates below!
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
               <h4 className="text-sm font-bold text-white">Your Weekly Attendance RSVP</h4>
               <p className="text-xs text-zinc-400 mt-0.5">
-                Early definitive responses help captain Ethan organize squad numbers & avoid forfeit fines.
+                Early definitive responses help captain Ethan organize squad numbers &amp; avoid forfeit fines.
               </p>
             </div>
             <div>
