@@ -1,0 +1,2 @@
+# Synthesis
+This was really a main problem for me. But the effects did reach others. Usually they don't do anything to fix it just dealing with the consequences. Nothing really suprised me. The real problem is getting people to care in the first place, getting them invoveled.

@@ -4,6 +4,32 @@ export type RSVPStatus = "yes" | "no" | "maybe" | "pending";
 
 export type Position = "GK" | "DEF" | "MID" | "FWD";
 
+export type UserRole = "captain" | "player" | "free_agent";
+
+// NYC Footy Divisions: P1 Novice, P2 Casual/Rec, P3 Intermediate, P4 Competitive, P5 Premier
+export type SkillLevel = "P1" | "P2" | "P3" | "P4" | "P5";
+
+export interface UserProfile {
+  id: string;
+  clerkId?: string;
+  name: string;
+  role: UserRole;
+  phone: string;
+  email?: string;
+  gender: GenderCategory;
+  skillLevel: SkillLevel;
+  preferredPositions: Position[];
+  teamId?: string;
+  isCaptain?: boolean;
+  subAvailability: {
+    isAvailable: boolean;
+    boroughs: string[];
+    availableMatchIds?: string[];
+    notes?: string;
+  };
+  bio?: string;
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -13,6 +39,12 @@ export interface Player {
   isCaptain?: boolean;
   phone?: string;
   avatar?: string;
+  skillLevel?: SkillLevel;
+  subAvailability?: {
+    isAvailable: boolean;
+    boroughs?: string[];
+    notes?: string;
+  };
 }
 
 export interface MatchRSVP {
@@ -48,13 +80,34 @@ export interface SubCandidate {
   id: string;
   name: string;
   phone: string;
+  email?: string;
   gender: GenderCategory;
   positions: Position[];
   tier: 1 | 2 | 3; // 1: Go-to starter sub, 2: Reliable friend, 3: Emergency contact
   reliabilityScore: number; // 1 to 5 stars
+  skillLevel?: SkillLevel;
+  boroughs?: string[];
   statusForNextMatch: "uncontacted" | "contacted" | "confirmed" | "declined";
   notes?: string;
+  bio?: string;
   lastPlayedDate?: string;
+  isAvailableForSubbing?: boolean;
+}
+
+export interface FreeAgentProfile extends SubCandidate {
+  registeredAt?: string;
+}
+
+export interface ShortageAlert {
+  id: string;
+  matchId: string;
+  type: "female_shortage" | "player_shortage" | "deadline_urgency";
+  severity: "critical" | "warning";
+  message: string;
+  femaleShortage: number;
+  totalShortage: number;
+  resolved: boolean;
+  createdAt: string;
 }
 
 export interface TeamSettings {
@@ -74,3 +127,4 @@ export interface TacticalLineup {
   formation: "2-3-1" | "3-2-1" | "2-2-2";
   positions: Record<string, string>; // slotId -> playerId or subId
 }
+

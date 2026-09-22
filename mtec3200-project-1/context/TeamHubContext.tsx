@@ -8,12 +8,16 @@ import {
   SubCandidate,
   TacticalLineup,
   TeamSettings,
+  UserProfile,
+  UserRole,
+  ShortageAlert,
 } from "@/types/footy";
 import {
   initialMatches,
   initialPlayers,
   initialSubCandidates,
   initialTeamSettings,
+  initialUserProfiles,
 } from "@/lib/initialData";
 import { convertLeagueAppsEventsToMatches, ParsedLeagueAppsEvent } from "@/lib/leagueapps";
 
@@ -22,6 +26,8 @@ const STORAGE_KEY_PLAYERS = "nyc_footy_players";
 const STORAGE_KEY_MATCHES = "nyc_footy_matches";
 const STORAGE_KEY_SUBS = "nyc_footy_subs";
 const STORAGE_KEY_TACTICS = "nyc_footy_tactics";
+const STORAGE_KEY_USER = "nyc_footy_current_user";
+const STORAGE_KEY_ROLE = "nyc_footy_active_role";
 
 const getStored = <T,>(key: string, fallback: T): T => {
   if (typeof window === "undefined") return fallback;
@@ -61,6 +67,19 @@ interface TeamHubContextType {
   setFormation: (matchId: string, formation: "2-3-1" | "3-2-1" | "2-2-2") => void;
   syncLeagueAppsMatches: (events: ParsedLeagueAppsEvent[], detectedTeamName?: string) => void;
   resetAllData: () => void;
+  // User & Role
+  currentUser: UserProfile;
+  setCurrentUser: (user: UserProfile) => void;
+  activeRole: UserRole;
+  setActiveRole: (role: UserRole) => void;
+  userProfiles: UserProfile[];
+  switchPersona: (userId: string) => void;
+  updateUserProfile: (updates: Partial<UserProfile>) => void;
+  toggleSubAvailability: (isAvailable: boolean, boroughs?: string[]) => void;
+  // Alerts & Simulation
+  activeAlerts: ShortageAlert[];
+  dismissAlert: (alertId: string) => void;
+  simulatePollScenario: (scenario: "female_drop" | "full_squad" | "mass_drop") => void;
   // Computed match metrics
   matchMetrics: {
     totalConfirmed: number;
@@ -115,8 +134,42 @@ export function TeamHubProvider({ children }: { children: React.ReactNode }) {
       },
     })
   );
+  const [userProfiles, setUserProfiles] = useState<UserProfile[]>(() =>
+    getStored("nyc_footy_user_profiles", initialUserProfiles)
+  );
+  const [currentUser, setCurrentUser] = useState<UserProfile>(() =>
+    getStored(STORAGE_KEY_USER, initialUserProfiles[0])
+  );
+  const [activeRole, setActiveRole] = useState<UserRole>(() =>
+    getStored(STORAGE_KEY_ROLE, "captain")
+  );
+  const [dismissedAlertIds, setDismissedAlertIds] = useState<string[]>([]);
 
   // Save to local storage on changes
+  useEffect(() => {
+    try {
+      localStorage.setItem("nyc_footy_user_profiles", JSON.stringify(userProfiles));
+    } catch (e) {
+      console.warn(e);
+    }
+  }, [userProfiles]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(currentUser));
+    } catch (e) {
+      console.warn(e);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_ROLE, JSON.stringify(activeRole));
+    } catch (e) {
+      console.warn(e);
+    }
+  }, [activeRole]);
+
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(teamSettings));
@@ -450,6 +503,109 @@ export function TeamHubProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const switchPersona = (userId: string) => {
+    const profile = userProfiles.find((u) => u.id === userId);
+    if (profile) {
+      setCurrentUser(profile);
+      setActiveRole(profile.role);
+    }
+  };
+
+  const updateUserProfile = (updates: Partial<UserProfile>) => {
+    setCurrentUser((prev) => {
+      const updated = { ...prev, ...updates };
+      setUserProfiles((list) =>
+        list.map((u) => (u.id === prev.id ? updated : u))
+      );
+      return updated;
+    });
+  };
+
+  const toggleSubAvailability = (isAvailable: boolean, boroughs?: string[]) => {
+    updateUserProfile({
+      subAvailability: {
+        ...currentUser.subAvailability,
+        isAvailable,
+        boroughs: boroughs || currentUser.subAvailability.boroughs,
+      },
+    });
+    setSubs((prev) =>
+      prev.map((s) =>
+        s.name.toLowerCase() === currentUser.name.toLowerCase()
+          ? { ...s, isAvailableForSubbing: isAvailable }
+          : s
+      )
+    );
+  };
+
+  const dismissAlert = (alertId: string) => {
+    setDismissedAlertIds((prev) => [...prev, alertId]);
+  };
+
+  const activeAlerts = useMemo<ShortageAlert[]>(() => {
+    if (!activeMatch) return [];
+    const alerts: ShortageAlert[] = [];
+
+    if (matchMetrics.femaleShortage > 0) {
+      const id = `alert-female-${activeMatch.id}`;
+      if (!dismissedAlertIds.includes(id)) {
+        alerts.push({
+          id,
+          matchId: activeMatch.id,
+          type: "female_shortage",
+          severity: "critical",
+          message: `Co-ed Rule Alert: Only ${matchMetrics.femaleConfirmed} of ${matchMetrics.minFemale} female players confirmed for Week ${activeMatch.week}! Need ${matchMetrics.femaleShortage} more to prevent forfeit.`,
+          femaleShortage: matchMetrics.femaleShortage,
+          totalShortage: matchMetrics.playerShortage,
+          resolved: false,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    }
+
+    if (matchMetrics.playerShortage > 0 && matchMetrics.femaleShortage === 0) {
+      const id = `alert-player-${activeMatch.id}`;
+      if (!dismissedAlertIds.includes(id)) {
+        alerts.push({
+          id,
+          matchId: activeMatch.id,
+          type: "player_shortage",
+          severity: "warning",
+          message: `Squad Shortage: ${matchMetrics.totalConfirmed}/${matchMetrics.targetSquadSize} confirmed for Week ${activeMatch.week}. Need ${matchMetrics.playerShortage} sub(s) for a healthy rotation.`,
+          femaleShortage: 0,
+          totalShortage: matchMetrics.playerShortage,
+          resolved: false,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    }
+
+    return alerts;
+  }, [activeMatch, matchMetrics, dismissedAlertIds]);
+
+  const simulatePollScenario = (scenario: "female_drop" | "full_squad" | "mass_drop") => {
+    if (!activeMatch) return;
+    setDismissedAlertIds([]);
+    if (scenario === "female_drop") {
+      updateRSVP(activeMatch.id, "p2", "no", "Sprained ankle in Thursday scrimmage");
+    } else if (scenario === "full_squad") {
+      setMatches((prev) =>
+        prev.map((m) => {
+          if (m.id !== activeMatch.id) return m;
+          const newRsvps = { ...m.rsvps };
+          players.forEach((p) => {
+            newRsvps[p.id] = { status: "yes", updatedAt: new Date().toISOString() };
+          });
+          return { ...m, rsvps: newRsvps };
+        })
+      );
+    } else if (scenario === "mass_drop") {
+      updateRSVP(activeMatch.id, "p2", "no", "Out of town");
+      updateRSVP(activeMatch.id, "p3", "no", "Attending wedding");
+      updateRSVP(activeMatch.id, "p5", "maybe", "Flight delay");
+    }
+  };
+
   return (
     <TeamHubContext.Provider
       value={{
@@ -480,6 +636,17 @@ export function TeamHubProvider({ children }: { children: React.ReactNode }) {
         setFormation,
         syncLeagueAppsMatches,
         resetAllData,
+        currentUser,
+        setCurrentUser,
+        activeRole,
+        setActiveRole,
+        userProfiles,
+        switchPersona,
+        updateUserProfile,
+        toggleSubAvailability,
+        activeAlerts,
+        dismissAlert,
+        simulatePollScenario,
         matchMetrics,
         seasonRecord,
       }}

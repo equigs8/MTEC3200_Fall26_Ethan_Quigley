@@ -1,15 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TeamHubProvider, useTeamHub } from "@/context/TeamHubContext";
 import { Navbar } from "@/components/Navbar";
 import { NextMatchCard } from "@/components/NextMatchCard";
 import { AttendancePoll } from "@/components/AttendancePoll";
-import { SubFinder } from "@/components/SubFinder";
+import { FreeAgentPortal } from "@/components/FreeAgentPortal";
+import { PlayerView } from "@/components/PlayerView";
+import { WorkflowAlertBanner } from "@/components/WorkflowAlertBanner";
 import { ScheduleList } from "@/components/ScheduleList";
 import { TacticalBoard } from "@/components/TacticalBoard";
 import { CaptainToolsModal } from "@/components/CaptainToolsModal";
 import { LeagueAppsModal } from "@/components/LeagueAppsModal";
+import { OnboardingModal } from "@/components/OnboardingModal";
 import {
   Vote,
   UserPlus,
@@ -18,12 +21,25 @@ import {
 } from "lucide-react";
 
 function TeamDashboardInner() {
+  const { matchMetrics, teamSettings, activeRole } = useTeamHub();
+
   const [activeTab, setActiveTab] = useState<string>("overview");
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isLeagueAppsOpen, setIsLeagueAppsOpen] = useState<boolean>(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
   const [settingsDefaultTab, setSettingsDefaultTab] = useState<"settings" | "share" | "roster">("settings");
+  const [freeAgentGenderFilter, setFreeAgentGenderFilter] = useState<"all" | "female">("all");
 
-  const { matchMetrics, teamSettings } = useTeamHub();
+  // Adjust active tab when role changes
+  useEffect(() => {
+    if (activeRole === "player") {
+      setActiveTab("player_view");
+    } else if (activeRole === "free_agent") {
+      setActiveTab("free_agents");
+    } else {
+      setActiveTab("overview");
+    }
+  }, [activeRole]);
 
   const handleOpenShare = () => {
     setSettingsDefaultTab("share");
@@ -35,6 +51,11 @@ function TeamDashboardInner() {
     setIsSettingsOpen(true);
   };
 
+  const handleOpenSubPortalWithFilter = (gender?: "female") => {
+    setFreeAgentGenderFilter(gender || "all");
+    setActiveTab("free_agents");
+  };
+
   return (
     <div className="min-h-screen bg-[#090d12] text-zinc-100 flex flex-col font-sans selection:bg-emerald-500/30 selection:text-emerald-300">
       {/* Navigation Bar & Mobile App Bar */}
@@ -43,17 +64,34 @@ function TeamDashboardInner() {
         setActiveTab={setActiveTab}
         openTeamSettings={handleOpenSettings}
         openLeagueAppsSync={() => setIsLeagueAppsOpen(true)}
+        openProfileModal={() => setIsProfileModalOpen(true)}
       />
 
-      {/* Main Content Area (with bottom padding for mobile sticky navigation bar) */}
+      {/* Main Content Area */}
       <main className="flex-1 mx-auto w-full max-w-7xl px-3.5 py-5 sm:px-6 sm:py-8 pb-24 md:pb-8">
-        {/* Tab 1: Overview / Match Hub */}
+        {/* Player View */}
+        {activeTab === "player_view" && (
+          <PlayerView
+            onOpenSubPortal={() => setActiveTab("free_agents")}
+            onOpenProfile={() => setIsProfileModalOpen(true)}
+          />
+        )}
+
+        {/* Free Agent & Sub Portal */}
+        {(activeTab === "free_agents" || activeTab === "subs") && (
+          <FreeAgentPortal initialGenderFilter={freeAgentGenderFilter} />
+        )}
+
+        {/* Captain Tab 1: Overview / Match Hub */}
         {activeTab === "overview" && (
           <div className="space-y-6 sm:space-y-8">
+            {/* Real-time Roster & Female Rule Workflow Banner */}
+            <WorkflowAlertBanner onOpenSubPortalWithFilter={handleOpenSubPortalWithFilter} />
+
             {/* Hero Card for Next Match */}
             <NextMatchCard
               onGoToPoll={() => setActiveTab("poll")}
-              onGoToSubs={() => setActiveTab("subs")}
+              onGoToSubs={() => handleOpenSubPortalWithFilter()}
               onOpenShareModal={handleOpenShare}
             />
 
@@ -87,9 +125,9 @@ function TeamDashboardInner() {
                 </div>
               </div>
 
-              {/* Sub Pipeline Card */}
+              {/* Free Agent Sub Portal Glimpse Card */}
               <div
-                onClick={() => setActiveTab("subs")}
+                onClick={() => handleOpenSubPortalWithFilter()}
                 className="group cursor-pointer rounded-3xl border border-zinc-800/80 bg-[#111823] p-5 sm:p-6 transition-all hover:border-amber-500/60 hover:bg-[#161f2e] shadow-lg active:scale-98"
               >
                 <div className="flex items-center justify-between">
@@ -100,19 +138,19 @@ function TeamDashboardInner() {
                     Sub Pool <ArrowRight className="h-3 w-3" />
                   </span>
                 </div>
-                <h3 className="mt-4 text-base sm:text-lg font-bold text-white">Sub Directory & Outreach</h3>
+                <h3 className="mt-4 text-base sm:text-lg font-bold text-white">Free Agent & Sub Portal</h3>
                 <p className="mt-1 text-xs text-zinc-400">
-                  Automatic shortage detection and 1-click WhatsApp/SMS contact with prioritized subs.
+                  Find available subs by skill tier and female quota. 1-click WhatsApp/SMS match invites.
                 </p>
                 <div className="mt-4 flex items-center gap-2">
                   <span
                     className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
                       matchMetrics.isReady
                         ? "bg-emerald-950/60 text-[#00e676] border border-emerald-800/40"
-                        : "bg-amber-950/60 text-amber-400 border border-amber-800/40"
+                        : "bg-rose-950/60 text-rose-400 border border-rose-800/40"
                     }`}
                   >
-                    {matchMetrics.isReady ? "No Subs Needed" : "Sub Alert Active"}
+                    {matchMetrics.isReady ? "No Shortage" : "Shortage Alert"}
                   </span>
                 </div>
               </div>
@@ -145,20 +183,17 @@ function TeamDashboardInner() {
               </div>
             </div>
 
-            {/* Quick Poll Section in Overview */}
+            {/* Attendance Poll Section in Overview */}
             <div className="pt-2">
-              <AttendancePoll onGoToSubs={() => setActiveTab("subs")} />
+              <AttendancePoll onGoToSubs={() => handleOpenSubPortalWithFilter()} />
             </div>
           </div>
         )}
 
         {/* Tab 2: Attendance Poll */}
         {activeTab === "poll" && (
-          <AttendancePoll onGoToSubs={() => setActiveTab("subs")} />
+          <AttendancePoll onGoToSubs={() => handleOpenSubPortalWithFilter()} />
         )}
-
-        {/* Tab 3: Sub Finder */}
-        {activeTab === "subs" && <SubFinder />}
 
         {/* Tab 4: Schedule */}
         {activeTab === "schedule" && <ScheduleList />}
@@ -167,16 +202,16 @@ function TeamDashboardInner() {
         {activeTab === "tactics" && <TacticalBoard />}
       </main>
 
-      {/* Footer with NYC Footy Brand Signature */}
+      {/* Footer */}
       <footer className="border-t border-zinc-800/80 bg-[#090d12] py-6 text-center text-xs text-zinc-500 pb-20 md:pb-6">
         <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="font-bold text-zinc-300">{teamSettings.name}</span>
             <span>•</span>
-            <span className="text-zinc-400">NYC Footy Team Hub</span>
+            <span className="text-zinc-400">NYC Footy Team Hub & Free Agent Portal</span>
             <span className="hidden sm:inline text-zinc-600">•</span>
             <span className="hidden sm:inline text-emerald-400/80 italic">
-              Coed Recreational Soccer with a Professional Touch
+              Powered by Clerk Auth
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -203,6 +238,12 @@ function TeamDashboardInner() {
           </div>
         </div>
       </footer>
+
+      {/* Profile & Onboarding Modal */}
+      <OnboardingModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
 
       {/* Captain Tools & Settings Modal */}
       <CaptainToolsModal
