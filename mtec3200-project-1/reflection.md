@@ -46,5 +46,6 @@ Give two or three examples.
     - I would have made a better plan for the project.
 - **What skills/knowledge I wish I had to fully flesh out my project:**
     - My experince with Node.js and Next.js is not great. So having a better understanding of that would help.
+    - I would have also loved to implent database features.
 - **Would I consider my project successful? Why or why not?**:
     - Yes. I think I did a good job. Implementing Clerk authentication was a challenge but I was able to get it done. I'm proud of the final product.
