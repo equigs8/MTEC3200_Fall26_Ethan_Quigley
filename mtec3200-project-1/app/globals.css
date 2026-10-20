@@ -1,3 +1,4 @@
+@layer theme, base, clerk, components, utilities;
 @import "tailwindcss";
 
 :root {
@@ -8,6 +9,22 @@
   --pitch-card: #111823;
   --pitch-border: #1e293b;
   --footy-green: #00e676;
+
+  /* Clerk v7+ CSS variables for dark pitch high-contrast readability */
+  --clerk-color-primary: #00e676;
+  --clerk-color-primary-foreground: #052e16;
+  --clerk-color-foreground: #ffffff;
+  --clerk-color-muted-foreground: #cbd5e1;
+  --clerk-color-background: #162032;
+  --clerk-color-muted: #1e293b;
+  --clerk-color-input: #1e293b;
+  --clerk-color-input-foreground: #ffffff;
+  --clerk-color-neutral: #ffffff;
+  --clerk-color-border: #334155;
+  --clerk-color-ring: #00e676;
+  --clerk-color-danger: #f87171;
+  --clerk-color-success: #00e676;
+  --clerk-color-warning: #fbbf24;
 }
 
 @theme inline {
@@ -145,3 +162,62 @@ button, a, input, select {
   box-shadow: 0 10px 30px -10px rgba(0, 230, 118, 0.15);
   transform: translateY(-2px);
 }
+
+/* Explicit high-contrast overrides for Clerk Auth components */
+.cl-cardBox,
+.cl-card {
+  background-color: #162032 !important;
+  color: #ffffff !important;
+}
+
+.cl-headerTitle {
+  color: #ffffff !important;
+}
+
+.cl-headerSubtitle,
+.cl-footerActionText,
+.cl-dividerText,
+.cl-formFieldHintText {
+  color: #cbd5e1 !important;
+}
+
+.cl-formFieldLabel {
+  color: #f8fafc !important;
+}
+
+.cl-formFieldInput {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+}
+
+.cl-formFieldInput::placeholder {
+  color: #94a3b8 !important;
+}
+
+.cl-socialButtonsBlockButton {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+}
+
+.cl-socialButtonsBlockButton:hover {
+  background-color: #334155 !important;
+}
+
+.cl-socialButtonsBlockButtonText {
+  color: #ffffff !important;
+}
+
+.cl-footer,
+.cl-footerPages {
+  background-color: #111827 !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+
+.cl-footerActionLink,
+.cl-formFieldAction {
+  color: #00e676 !important;
+}
+

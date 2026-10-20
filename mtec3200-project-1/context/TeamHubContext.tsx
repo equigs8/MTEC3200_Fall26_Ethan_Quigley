@@ -603,14 +603,56 @@ export function TeamHubProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  /**
+   * Switches the active user persona (Captain, Rostered Player, or Free Agent).
+   * If the selected persona has `subAvailability.isAvailable` enabled, ensures
+   * their `SubCandidate` card is present in the Free Agent Pool.
+   */
   const switchPersona = (userId: string) => {
     const profile = userProfiles.find((u) => u.id === userId);
     if (profile) {
       setCurrentUser(profile);
       setActiveRole(profile.role);
+      if (profile.subAvailability?.isAvailable) {
+        setSubs((list) => {
+          const exists = list.some(
+            (s) =>
+              s.id === profile.id ||
+              s.id === `sub-${profile.id}` ||
+              s.name.toLowerCase() === profile.name.toLowerCase()
+          );
+          if (exists) return list;
+          return [
+            {
+              id: `sub-${profile.id}`,
+              name: profile.name,
+              gender: profile.gender,
+              positions: profile.preferredPositions,
+              phone: profile.phone,
+              skillLevel: profile.skillLevel || "P3",
+              tier: 1,
+              reliabilityScore: 5,
+              statusForNextMatch: "uncontacted",
+              bio: profile.subAvailability?.notes || profile.bio || "Available to sub for NYC Footy matches.",
+              notes: profile.subAvailability?.notes || profile.bio,
+              boroughs: profile.subAvailability?.boroughs || ["Brooklyn"],
+              isAvailableForSubbing: true,
+              avatar: profile.avatar,
+            },
+            ...list,
+          ];
+        });
+      }
     }
   };
 
+  /**
+   * Updates the current user's profile and synchronizes their attributes across:
+   * 1. `userProfiles` (persona switcher list)
+   * 2. `players` (team roster)
+   * 3. `subs` (NYC Footy Free Agent Pool — updating existing entry or inserting a new
+   *    `SubCandidate` at the top of the pool when `subAvailability.isAvailable` is true)
+   */
   const updateUserProfile = (updates: Partial<UserProfile>) => {
     setCurrentUser((prev) => {
       const updated = { ...prev, ...updates };
@@ -632,43 +674,64 @@ export function TeamHubProvider({ children }: { children: React.ReactNode }) {
             : p
         )
       );
-      // Synchronize with free agent sub pool
-      setSubs((list) =>
-        list.map((s) =>
-          s.name.toLowerCase() === prev.name.toLowerCase() || s.id === prev.id
-            ? {
-                ...s,
-                name: updated.name,
-                gender: updated.gender,
-                positions: updated.preferredPositions,
-                phone: updated.phone,
-                skillLevel: updated.skillLevel,
-                bio: updated.bio,
-                boroughs: updated.subAvailability.boroughs,
-                isAvailableForSubbing: updated.subAvailability.isAvailable,
-              }
-            : s
-        )
-      );
+      // Synchronize with free agent sub pool (update existing or insert if newly available)
+      setSubs((list) => {
+        const matchIndex = list.findIndex(
+          (s) =>
+            s.id === prev.id ||
+            s.id === `sub-${prev.id}` ||
+            s.name.toLowerCase() === prev.name.toLowerCase() ||
+            s.name.toLowerCase() === updated.name.toLowerCase()
+        );
+
+        const syncedFields = {
+          name: updated.name,
+          gender: updated.gender,
+          positions: updated.preferredPositions,
+          phone: updated.phone,
+          skillLevel: updated.skillLevel || "P3",
+          bio: updated.subAvailability?.notes || updated.bio || "Available to sub for NYC Footy matches.",
+          notes: updated.subAvailability?.notes || updated.bio,
+          boroughs: updated.subAvailability?.boroughs || ["Brooklyn"],
+          isAvailableForSubbing: updated.subAvailability?.isAvailable ?? false,
+          avatar: updated.avatar,
+        };
+
+        if (matchIndex >= 0) {
+          return list.map((s, idx) =>
+            idx === matchIndex ? { ...s, ...syncedFields } : s
+          );
+        }
+
+        if (updated.subAvailability?.isAvailable) {
+          const newSubEntry: SubCandidate = {
+            id: `sub-${updated.id}`,
+            tier: 1,
+            reliabilityScore: 5,
+            statusForNextMatch: "uncontacted",
+            ...syncedFields,
+          };
+          return [newSubEntry, ...list];
+        }
+
+        return list;
+      });
       return updated;
     });
   };
 
+  /**
+   * Toggles whether the current user is listed as available to sub for other teams
+   * in the NYC Footy Free Agent Pool, optionally updating their preferred boroughs.
+   */
   const toggleSubAvailability = (isAvailable: boolean, boroughs?: string[]) => {
     updateUserProfile({
       subAvailability: {
         ...currentUser.subAvailability,
         isAvailable,
-        boroughs: boroughs || currentUser.subAvailability.boroughs,
+        boroughs: boroughs || currentUser.subAvailability?.boroughs || ["Brooklyn"],
       },
     });
-    setSubs((prev) =>
-      prev.map((s) =>
-        s.name.toLowerCase() === currentUser.name.toLowerCase()
-          ? { ...s, isAvailableForSubbing: isAvailable }
-          : s
-      )
-    );
   };
 
   const dismissAlert = (alertId: string) => {

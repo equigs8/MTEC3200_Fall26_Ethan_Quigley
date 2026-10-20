@@ -24,10 +24,21 @@ export const metadata: Metadata = {
     "Team command center for NYC Footy: weekly attendance polls, 7v7 tactical lineups, match schedule, and free agent sub recruitment.",
 };
 
+/**
+ * Clerk Publishable Key resolution:
+ * Prefers `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` from `.env.local` and falls back
+ * to the provisioned development instance key so authentication works out-of-the-box.
+ */
 const publishableKey =
   process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
-  "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk";
+  "pk_test_d2hvbGUtcmFiYml0LTk3NzIuY2xlcmsuYWNjb3VudHMuZGV2JA";
 
+/**
+ * RootLayout Component
+ *
+ * Top-level Next.js App Router layout that configures the Poppins Google Font,
+ * dark pitch theme styling, and the global `<ClerkProvider>` with `footyClerkTheme`.
+ */
 export default function RootLayout({
   children,
 }: {
@@ -53,3 +64,4 @@ export default function RootLayout({
     </html>
   );
 }
+

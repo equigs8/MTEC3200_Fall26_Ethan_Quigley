@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTeamHub } from "@/context/TeamHubContext";
 import { GenderCategory, Position, SkillLevel, SubCandidate } from "@/types/footy";
 import {
@@ -18,14 +18,29 @@ import {
   X,
   Plus,
   Zap,
+  Radio,
+  SlidersHorizontal,
+  Check,
 } from "lucide-react";
-import { triggerSquadReadyConfetti } from "@/lib/confetti";
+import { triggerSquadReadyConfetti, triggerRSVPConfetti } from "@/lib/confetti";
 import { soundFx } from "@/lib/soundEffects";
 
 interface FreeAgentPortalProps {
+  /** Optional initial gender filter ('female' when launched from a Co-ed Quota shortage alert). */
   initialGenderFilter?: "female" | "all";
 }
 
+/**
+ * FreeAgentPortal Component
+ *
+ * Provides the NYC Footy Community Sub Pool & Free Agent Marketplace:
+ * 1. Allows the active user (`currentUser`) to list themselves as available for other
+ *    NYC Footy teams to call on them to sub, and customize their preferred boroughs,
+ *    positions, skill division, contact phone, and availability note.
+ * 2. Enables captains and players to filter available substitutes by gender (including
+ *    a 1-click Female Co-ed Quota filter), skill tier (P1-P5), position, and borough.
+ * 3. Supports 1-click WhatsApp/SMS outreach and squad confirmation for the upcoming match.
+ */
 export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
   initialGenderFilter = "all",
 }) => {
@@ -37,8 +52,11 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
     triggerSubOutreach,
     confirmSubForMatch,
     removeSubFromMatch,
+    currentUser,
+    updateUserProfile,
   } = useTeamHub();
 
+  // Directory filter state
   const [genderFilter, setGenderFilter] = useState<"all" | GenderCategory>(
     initialGenderFilter
   );
@@ -47,7 +65,47 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
   const [boroughFilter, setBoroughFilter] = useState<string>("all");
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
-  // New free agent registration form
+  // Current user's personal sub availability & preferences state
+  const [isEditingMySub, setIsEditingMySub] = useState(false);
+  const [myBoroughs, setMyBoroughs] = useState<string[]>(
+    currentUser.subAvailability?.boroughs?.length
+      ? currentUser.subAvailability.boroughs
+      : ["Brooklyn"]
+  );
+  const [myPositions, setMyPositions] = useState<Position[]>(
+    currentUser.preferredPositions?.length ? currentUser.preferredPositions : ["MID"]
+  );
+  const [mySkill, setMySkill] = useState<SkillLevel>(currentUser.skillLevel || "P3");
+  const [myPhone, setMyPhone] = useState<string>(currentUser.phone || "");
+  const [mySubNote, setMySubNote] = useState<string>(
+    currentUser.subAvailability?.notes ||
+      currentUser.bio ||
+      "Available to sub for other teams on off-weeks or weeknights!"
+  );
+  const [savedBanner, setSavedBanner] = useState(false);
+
+  /**
+   * Synchronize local sub customization fields whenever the active user persona changes.
+   */
+  useEffect(() => {
+    setMyBoroughs(
+      currentUser.subAvailability?.boroughs?.length
+        ? currentUser.subAvailability.boroughs
+        : ["Brooklyn"]
+    );
+    setMyPositions(
+      currentUser.preferredPositions?.length ? currentUser.preferredPositions : ["MID"]
+    );
+    setMySkill(currentUser.skillLevel || "P3");
+    setMyPhone(currentUser.phone || "");
+    setMySubNote(
+      currentUser.subAvailability?.notes ||
+        currentUser.bio ||
+        "Available to sub for other teams on off-weeks or weeknights!"
+    );
+  }, [currentUser.id]);
+
+  // External free agent registration modal form state
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [newGender, setNewGender] = useState<GenderCategory>("female");
@@ -58,6 +116,89 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
 
   if (!activeMatch) return null;
 
+  /** Whether the current user is actively listed as available to sub in the pool. */
+  const isMySubAvailable = Boolean(currentUser.subAvailability?.isAvailable);
+
+  /**
+   * Toggles the current user's sub availability status in the community Free Agent Pool.
+   * Plays celebratory audio and confetti when the user lists themselves as available.
+   */
+  const handleToggleMySubAvailability = () => {
+    const nextState = !isMySubAvailable;
+    updateUserProfile({
+      phone: myPhone.trim() || currentUser.phone,
+      skillLevel: mySkill,
+      preferredPositions: myPositions,
+      bio: mySubNote.trim() || currentUser.bio,
+      subAvailability: {
+        isAvailable: nextState,
+        boroughs: myBoroughs,
+        notes: mySubNote.trim(),
+      },
+    });
+    if (nextState) {
+      soundFx.playSuccess();
+      triggerRSVPConfetti();
+    } else {
+      soundFx.playPop();
+    }
+  };
+
+  /**
+   * Saves the current user's customized sub preferences (boroughs, positions, skill tier,
+   * phone number, and availability note) and ensures their listing is set to active.
+   */
+  const handleSaveMySubDetails = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateUserProfile({
+      phone: myPhone.trim() || currentUser.phone,
+      skillLevel: mySkill,
+      preferredPositions: myPositions,
+      bio: mySubNote.trim() || currentUser.bio,
+      subAvailability: {
+        isAvailable: true,
+        boroughs: myBoroughs,
+        notes: mySubNote.trim(),
+      },
+    });
+    soundFx.playSuccess();
+    triggerRSVPConfetti();
+    setIsEditingMySub(false);
+    setSavedBanner(true);
+    setTimeout(() => setSavedBanner(false), 3000);
+  };
+
+  /**
+   * Toggles a borough in the current user's sub availability preferences (minimum 1 required).
+   */
+  const toggleMyBorough = (borough: string) => {
+    soundFx.playPop();
+    if (myBoroughs.includes(borough)) {
+      if (myBoroughs.length > 1) {
+        setMyBoroughs(myBoroughs.filter((b) => b !== borough));
+      }
+    } else {
+      setMyBoroughs([...myBoroughs, borough]);
+    }
+  };
+
+  /**
+   * Toggles a pitch position in the current user's sub availability preferences (minimum 1 required).
+   */
+  const toggleMyPosition = (pos: Position) => {
+    soundFx.playPop();
+    if (myPositions.includes(pos)) {
+      if (myPositions.length > 1) {
+        setMyPositions(myPositions.filter((p) => p !== pos));
+      }
+    } else {
+      setMyPositions([...myPositions, pos]);
+    }
+  };
+
+  /**
+   * Opens a pre-filled WhatsApp or SMS message to invite a substitute to the active match.
+   */
   const handleOutreach = (subId: string, channel: "whatsapp" | "sms") => {
     soundFx.playPop();
     const url = triggerSubOutreach(subId, activeMatch.id, channel);
@@ -66,6 +207,9 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
     }
   };
 
+  /**
+   * Registers an external free agent substitute into the shared sub pool.
+   */
   const handleRegisterSub = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim() || !newPhone.trim()) return;
@@ -90,6 +234,7 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
     setNewBio("");
   };
 
+  // Filter active sub candidates according to selected criteria
   const filteredSubs = subs.filter((sub) => {
     if (sub.isAvailableForSubbing === false) return false;
     if (genderFilter !== "all" && sub.gender !== genderFilter) return false;
@@ -116,7 +261,7 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
             </h2>
             <p className="mt-1 text-xs sm:text-sm text-zinc-400 max-w-2xl">
               Alleviating the strains of free agent teams: recruit vetted players, satisfy the
-              official 2+ female co-ed rule, and 1-click dispatch WhatsApp/SMS match invites.
+              official 2+ female co-ed rule, or list yourself to get called up by other squads.
             </p>
           </div>
 
@@ -134,10 +279,10 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
 
             <button
               onClick={() => setIsRegisterModalOpen(true)}
-              className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-500 shadow-lg shadow-emerald-950/40 transition active:scale-95"
+              className="flex items-center gap-1.5 rounded-xl border border-zinc-700 bg-[#090d12] px-4 py-2 text-xs font-bold text-zinc-200 hover:border-emerald-500/50 hover:text-white transition active:scale-95"
             >
-              <Plus className="h-4 w-4" />
-              <span>List as Free Agent</span>
+              <Plus className="h-4 w-4 text-[#00e676]" />
+              <span>Add External Sub</span>
             </button>
           </div>
         </div>
@@ -196,6 +341,275 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
             </button>
           )}
         </div>
+      </div>
+
+      {/* NEW: List Myself as Available for Another Team to Call On Section */}
+      <div
+        className={`rounded-3xl border p-5 sm:p-6 shadow-xl transition-all ${
+          isMySubAvailable
+            ? "border-emerald-500/50 bg-gradient-to-br from-emerald-950/30 via-[#111823] to-[#0f1722] shadow-emerald-950/20"
+            : "border-zinc-800 bg-[#111823]"
+        }`}
+      >
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border text-lg font-black transition-all ${
+                isMySubAvailable
+                  ? "border-emerald-400/50 bg-emerald-500/20 text-[#00e676] shadow-lg shadow-emerald-950/50"
+                  : "border-zinc-700 bg-[#090d12] text-zinc-400"
+              }`}
+            >
+              <Radio className={`h-6 w-6 ${isMySubAvailable ? "animate-pulse" : ""}`} />
+            </div>
+
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                  Sub for Other Teams
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-bold border ${
+                    isMySubAvailable
+                      ? "bg-emerald-500/20 text-[#00e676] border-emerald-500/40"
+                      : "bg-zinc-800/80 text-zinc-400 border-zinc-700"
+                  }`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      isMySubAvailable ? "bg-[#00e676] animate-ping" : "bg-zinc-500"
+                    }`}
+                  />
+                  {isMySubAvailable ? "Available for Call-Ups" : "Not Currently Listed"}
+                </span>
+                {savedBanner && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 px-2.5 py-0.5 text-[11px] font-bold text-emerald-300 animate-in fade-in">
+                    <Check className="h-3 w-3" /> Listing Updated!
+                  </span>
+                )}
+              </div>
+
+              <h3 className="mt-1 text-lg sm:text-xl font-black text-white">
+                Want to play extra games? List yourself as an available sub
+              </h3>
+              <p className="mt-0.5 text-xs text-zinc-300 max-w-2xl">
+                {isMySubAvailable ? (
+                  <>
+                    <strong className="text-white">{currentUser.name}</strong> is live in the NYC
+                    Footy Free Agent Pool for{" "}
+                    <span className="text-emerald-400 font-semibold">
+                      {myBoroughs.join(", ")}
+                    </span>{" "}
+                    ({mySkill} • {myPositions.join("/")}). Other captains can WhatsApp or text you
+                    when they&apos;re short players!
+                  </>
+                ) : (
+                  <>
+                    Turn on your availability beacon as{" "}
+                    <strong className="text-white">{currentUser.name}</strong> so other NYC Footy
+                    captains can call on you to sub when your team is off or you want an extra run.
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+
+          {/* Action Controls */}
+          <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-center shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                soundFx.playPop();
+                setIsEditingMySub(!isEditingMySub);
+              }}
+              className="flex items-center gap-1.5 rounded-xl border border-zinc-700 bg-[#090d12] px-3.5 py-2.5 text-xs font-semibold text-zinc-200 hover:border-emerald-500/50 hover:text-white transition active:scale-95"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5 text-emerald-400" />
+              <span>{isEditingMySub ? "Hide Preferences" : "Customize My Sub Info"}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleToggleMySubAvailability}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all active:scale-95 shadow-lg ${
+                isMySubAvailable
+                  ? "bg-zinc-800 border border-zinc-700 text-zinc-200 hover:bg-rose-950/60 hover:border-rose-500/40 hover:text-rose-200"
+                  : "bg-[#00e676] text-zinc-950 hover:bg-emerald-400 shadow-emerald-950/50"
+              }`}
+            >
+              <Zap className={`h-4 w-4 ${isMySubAvailable ? "text-amber-400" : "text-zinc-950"}`} />
+              <span>
+                {isMySubAvailable
+                  ? "Pause My Sub Availability"
+                  : "List Myself as Available to Sub"}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Summary Pills when collapsed */}
+        {!isEditingMySub && (
+          <div className="mt-4 pt-3.5 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-zinc-400 font-medium">Your Sub Profile:</span>
+              <span className="rounded-lg bg-[#090d12] border border-zinc-800 px-2.5 py-1 text-zinc-200 font-semibold">
+                {currentUser.name} ({currentUser.gender})
+              </span>
+              <span className="rounded-lg bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 text-[#00e676] font-bold">
+                {mySkill} Division
+              </span>
+              <span className="rounded-lg bg-[#090d12] border border-zinc-800 px-2.5 py-1 text-zinc-200 font-semibold">
+                Positions: {myPositions.join(", ")}
+              </span>
+              <span className="rounded-lg bg-[#090d12] border border-zinc-800 px-2.5 py-1 text-sky-300 font-semibold flex items-center gap-1">
+                <MapPin className="h-3 w-3 text-sky-400" />
+                {myBoroughs.join(", ")}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsEditingMySub(true)}
+              className="text-xs font-semibold text-[#00e676] hover:underline"
+            >
+              Edit boroughs, positions &amp; note →
+            </button>
+          </div>
+        )}
+
+        {/* Expandable Inline Customization Form */}
+        {isEditingMySub && (
+          <form
+            onSubmit={handleSaveMySubDetails}
+            className="mt-5 pt-5 border-t border-zinc-800/90 space-y-4 animate-in fade-in duration-150"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Preferred Boroughs */}
+              <div className="rounded-2xl bg-[#090d12] p-3.5 border border-zinc-800">
+                <label className="text-xs font-bold text-zinc-200 block mb-2">
+                  1. Boroughs You Can Sub In
+                </label>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {["Brooklyn", "Manhattan", "Queens", "Bronx"].map((b) => {
+                    const active = myBoroughs.includes(b);
+                    return (
+                      <button
+                        key={b}
+                        type="button"
+                        onClick={() => toggleMyBorough(b)}
+                        className={`py-1.5 px-2.5 rounded-xl border text-xs font-semibold transition flex items-center justify-between ${
+                          active
+                            ? "border-sky-500 bg-sky-500/20 text-white"
+                            : "border-zinc-800 bg-[#111823] text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        <span>{b}</span>
+                        {active && <Check className="h-3 w-3 text-sky-400" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Preferred Positions */}
+              <div className="rounded-2xl bg-[#090d12] p-3.5 border border-zinc-800">
+                <label className="text-xs font-bold text-zinc-200 block mb-2">
+                  2. Positions You Play
+                </label>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {(["GK", "DEF", "MID", "FWD"] as Position[]).map((pos) => {
+                    const active = myPositions.includes(pos);
+                    return (
+                      <button
+                        key={pos}
+                        type="button"
+                        onClick={() => toggleMyPosition(pos)}
+                        className={`py-1.5 px-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-between ${
+                          active
+                            ? "border-emerald-500 bg-emerald-500/20 text-[#00e676]"
+                            : "border-zinc-800 bg-[#111823] text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        <span>{pos}</span>
+                        {active && <Check className="h-3 w-3 text-[#00e676]" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Skill Level & Contact Phone */}
+              <div className="rounded-2xl bg-[#090d12] p-3.5 border border-zinc-800 space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-zinc-200 block mb-1.5">
+                    3. Skill Division
+                  </label>
+                  <div className="grid grid-cols-5 gap-1">
+                    {(["P1", "P2", "P3", "P4", "P5"] as SkillLevel[]).map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setMySkill(s)}
+                        className={`py-1 rounded-lg border text-xs font-bold transition ${
+                          mySkill === s
+                            ? "border-emerald-500 bg-emerald-500/20 text-[#00e676]"
+                            : "border-zinc-800 bg-[#111823] text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-zinc-200 block mb-1">
+                    WhatsApp / SMS Number for Captains
+                  </label>
+                  <input
+                    type="tel"
+                    value={myPhone}
+                    onChange={(e) => setMyPhone(e.target.value)}
+                    placeholder="e.g. 917-555-0142"
+                    className="w-full rounded-xl border border-zinc-700 bg-[#111823] px-3 py-1.5 text-xs text-white focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Availability Pitch Note */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-3">
+              <div className="flex-1">
+                <label className="text-xs font-bold text-zinc-200 block mb-1">
+                  Availability Note for Other Team Captains
+                </label>
+                <input
+                  type="text"
+                  value={mySubNote}
+                  onChange={(e) => setMySubNote(e.target.value)}
+                  placeholder="e.g. Free Sunday afternoons & Tuesday nights in Williamsburg / Greenpoint! Can bring a light & dark shirt."
+                  className="w-full rounded-xl border border-zinc-700 bg-[#090d12] px-3.5 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingMySub(false)}
+                  className="rounded-xl border border-zinc-700 px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-[#00e676] px-5 py-2 text-xs font-bold text-zinc-950 hover:bg-emerald-400 shadow-lg shadow-emerald-950/50 transition active:scale-95"
+                >
+                  Save &amp; List Me as Available
+                </button>
+              </div>
+            </div>
+          </form>
+        )}
       </div>
 
       {/* Filter Toolbar */}
@@ -265,6 +679,7 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
               <option value="Brooklyn">Brooklyn</option>
               <option value="Manhattan">Manhattan</option>
               <option value="Queens">Queens</option>
+              <option value="Bronx">Bronx</option>
             </select>
           </div>
         </div>
@@ -312,12 +727,18 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredSubs.map((sub) => {
           const isConfirmed = activeMatch.subsConfirmed.includes(sub.id);
+          const isCurrentUserSub =
+            sub.id === `sub-${currentUser.id}` ||
+            sub.id === currentUser.id ||
+            sub.name.toLowerCase() === currentUser.name.toLowerCase();
 
           return (
             <div
               key={sub.id}
               className={`rounded-3xl border bg-[#111823] p-5 shadow-xl transition-all flex flex-col justify-between ${
-                sub.gender === "female"
+                isCurrentUserSub
+                  ? "border-emerald-500/70 ring-1 ring-emerald-500/30 bg-gradient-to-b from-emerald-950/20 to-[#111823]"
+                  : sub.gender === "female"
                   ? "border-rose-950/60 hover:border-rose-500/60"
                   : "border-zinc-800 hover:border-emerald-500/60"
               }`}
@@ -326,8 +747,13 @@ export const FreeAgentPortal: React.FC<FreeAgentPortalProps> = ({
                 {/* Top Card Header */}
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       <span className="text-base font-bold text-white">{sub.name}</span>
+                      {isCurrentUserSub && (
+                        <span className="rounded-md bg-[#00e676] px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-zinc-950">
+                          You • Active Listing
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5 mt-1">
                       <span
